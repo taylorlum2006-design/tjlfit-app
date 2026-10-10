@@ -5,6 +5,7 @@ export interface Api {
   currentUserId(): Promise<string | null>
   onAuthChange(cb: () => void): () => void
   signIn(email: string): Promise<void>
+  verifyCode(email: string, code: string): Promise<void>
   signOut(): Promise<void>
   getProfile(id: string): Promise<Profile | null>
   updateProfile(id: string, patch: Partial<Profile>): Promise<void>

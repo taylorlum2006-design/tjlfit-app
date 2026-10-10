@@ -38,7 +38,7 @@ export default function CoachHome() {
     <div className="min-h-screen max-w-3xl mx-auto px-4 pb-16">
       <header className="flex items-center justify-between py-4 pt-[max(env(safe-area-inset-top),1rem)]">
         <img src={brand.logo} alt={brand.appName} className="h-9" />
-        <button className="text-sm text-mute" onClick={() => api.signOut()}>Sign out</button>
+        {api.mode === 'live' ? <button className="text-sm text-mute" onClick={() => api.signOut()}>Sign out</button> : <a href="/" className="text-sm text-mute">View client app</a>}
       </header>
       <h1 className="h-display text-[52px] mt-4">Clients</h1>
       <p className="text-mute mt-1 mb-6">Coach view for {me?.name || brand.coachName}</p>

@@ -52,13 +52,14 @@ const wait = () => new Promise(r => setTimeout(r, 120))
 
 export function resetDemo() { db = seed(); save(); location.reload() }
 
-export const demoApi: Api & { signInAs(id: string): void } = {
+export const demoApi: Api = {
   mode: 'demo',
-  async currentUserId() { return db.session },
+  // Preview: the coach view lives at /coach, everything else is the sample client's app.
+  async currentUserId() { return location.pathname.startsWith('/coach') ? 'coach' : 'alex' },
   onAuthChange(cb) { listeners.add(cb); return () => listeners.delete(cb) },
-  signInAs(id) { db.session = id; save(); listeners.forEach(l => l()) },
-  async signIn() { throw new Error('Demo mode: pick client or coach below.') },
-  async signOut() { db.session = null; save(); listeners.forEach(l => l()) },
+  async signIn() {},
+  async verifyCode() {},
+  async signOut() { listeners.forEach(l => l()) },
   async getProfile(id) { return db.profiles.find(p => p.id === id) ?? null },
   async updateProfile(id, patch) { db.profiles = db.profiles.map(p => (p.id === id ? { ...p, ...patch } : p)); save() },
   async listClients(coachId) { return db.profiles.filter(p => p.coach_id === coachId) },
@@ -76,7 +77,7 @@ export const demoApi: Api & { signInAs(id: string): void } = {
   async inviteClient(email, name) {
     await wait()
     const id = crypto.randomUUID()
-    db.profiles.push({ id, role: 'client', coach_id: db.session, name, email, timezone: tz, units: 'lbs', start_date: todayIn(tz), daily_reminder_time: '08:00', weekly_checkin_day: 0 })
+    db.profiles.push({ id, role: 'client', coach_id: 'coach', name, email, timezone: tz, units: 'lbs', start_date: todayIn(tz), daily_reminder_time: '08:00', weekly_checkin_day: 0 })
     db.plans.push(samplePlan(id)); save()
   },
   async listCalls(clientId) { return db.calls.filter(c => c.client_id === clientId).sort((a, b) => b.scheduled_at.localeCompare(a.scheduled_at)) },

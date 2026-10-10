@@ -14,6 +14,10 @@ export function supabaseApi(url: string, key: string): Api {
       const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin, shouldCreateUser: false } })
       if (error) throw new Error(error.message.includes('Signups not allowed') ? 'No account for that email yet. Ask your coach to invite you.' : error.message)
     },
+    async verifyCode(email, code) {
+      const { error } = await sb.auth.verifyOtp({ email, token: code.trim(), type: 'email' })
+      if (error) throw new Error(error.message.toLowerCase().includes('expired') ? 'That code has expired. Send a new one.' : 'That code did not work. Check it and try again.')
+    },
     async signOut() { await sb.auth.signOut() },
     async getProfile(id) { return must(await sb.from('profiles').select('*').eq('id', id).maybeSingle()) },
     async updateProfile(id, patch) { const { role, coach_id, email, ...safe } = patch as any; must(await sb.from('profiles').update(safe).eq('id', id)) },

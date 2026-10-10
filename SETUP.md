@@ -7,7 +7,7 @@ The app runs in **preview mode** (sample data, stored only in your browser) unti
 1. Go to netlify.com and sign up with GitHub.
 2. **Add new site → Import an existing project → GitHub →** pick `tjlfit-app`.
 3. Leave the build settings as they are (they come from `netlify.toml`) and click **Deploy**.
-4. After about a minute you get a link like `something.netlify.app`. Open it on your phone. You can preview as a client or as the coach.
+4. After about a minute you get a link like `something.netlify.app`. Open it on your phone to see the client app with sample data. Add `/coach` to the end of the link for the coach dashboard.
 
 Rename the site in **Site configuration → Change site name** (e.g. `tjlfit`).
 
@@ -17,7 +17,15 @@ Rename the site in **Site configuration → Change site name** (e.g. `tjlfit`).
 2. When it's ready, open **SQL Editor → New query**. Copy everything in `supabase/migrations/0001_init.sql`, paste it in, click **Run**. You should see "Success". Then do the same with `supabase/migrations/0002_calls_files.sql` (calls and files).
 3. Open **Authentication → Sign In / Providers**. Make sure **Email** is on, and turn **Allow new users to sign up** off (clients only get in through your invite).
 4. Open **Authentication → URL Configuration**. Set **Site URL** to your Netlify link (e.g. `https://tjlfit.netlify.app`) and add the same link under **Redirect URLs**.
-5. Open **Project Settings → API**. You need three values: the **Project URL**, the **anon public** key, and the **service_role** key. Never paste these into chat.
+5. Open **Authentication → Emails → Magic Link** and replace the message with this, then save. It lets clients sign in with a 6-digit code, which is what works inside the iPhone home-screen app:
+
+   ```html
+   <h2>Your TJL Fit sign-in code</h2>
+   <p style="font-size:28px;letter-spacing:6px"><strong>{{ .Token }}</strong></p>
+   <p>Or tap <a href="{{ .ConfirmationURL }}">this link</a> to sign in on this device.</p>
+   ```
+
+6. Open **Project Settings → API**. You need three values: the **Project URL**, the **anon public** key, and the **service_role** key. Never paste these into chat.
 
 ## 3. Connect them
 
@@ -44,7 +52,13 @@ Then **Deploys → Trigger deploy → Deploy site**. The app is now live with re
    update public.profiles set role = 'coach', name = 'Taylor' where email = 'coach@email.com';
    ```
 
-4. Reload the app. You now see the coach dashboard and can invite clients from there.
+4. Go to your link with `/coach` on the end (e.g. `tjlfitapp.netlify.app/coach`). You now see the coach dashboard and can invite clients from there.
+
+## What clients see
+
+Clients only ever get the client app. Even if they type `/coach`, they're sent back to their own plan, and the database blocks them from anyone else's data.
+
+They sign in once per device with the code from their email. After that the app opens straight to their plan, with a "Good morning, name" screen the first time they open it each day.
 
 ## Calls and files
 
