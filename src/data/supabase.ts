@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { Api } from './api'
-import type { Photo } from '../types'
+import type { Doc, Photo } from '../types'
 
 export function supabaseApi(url: string, key: string): Api {
   const sb: SupabaseClient = createClient(url, key)
@@ -44,6 +44,41 @@ export function supabaseApi(url: string, key: string): Api {
         body: JSON.stringify({ email, name, redirectTo: window.location.origin }),
       })
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Invite failed')
+    },
+    async listCalls(clientId) { return must(await sb.from('calls').select('*').eq('client_id', clientId).order('scheduled_at', { ascending: false })) ?? [] },
+    async saveCall(call) { must(await sb.from('calls').upsert(call)) },
+    async deleteCall(id) { must(await sb.from('calls').delete().eq('id', id)) },
+    async getCallPrivate(callId) { return must(await sb.from('call_private').select('*').eq('call_id', callId).maybeSingle()) },
+    async saveCallPrivate(row) { must(await sb.from('call_private').upsert(row)) },
+    async summarize(transcript, clientName) {
+      const { data } = await sb.auth.getSession()
+      const res = await fetch('/.netlify/functions/summarize-call', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${data.session?.access_token}` },
+        body: JSON.stringify({ transcript, clientName }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(body.error || 'Summary failed')
+      return body.summary
+    },
+    async listDocs(clientId) {
+      const rows: any[] = must(await sb.from('documents').select('*').eq('client_id', clientId).order('created_at', { ascending: false })) ?? []
+      if (!rows.length) return []
+      const { data } = await sb.storage.from('documents').createSignedUrls(rows.map(r => r.storage_path), 3600)
+      return rows.map((r, i): Doc => ({ id: r.id, client_id: r.client_id, title: r.title, size: r.size, client_visible: r.client_visible, created_at: r.created_at, url: data?.[i]?.signedUrl ?? '', storage_path: r.storage_path } as Doc))
+    },
+    async uploadDoc(clientId, title, file, visible) {
+      const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+      const path = `${clientId}/${Date.now()}-${safe}`
+      const up = await sb.storage.from('documents').upload(path, file, { contentType: file.type || 'application/pdf' })
+      if (up.error) throw new Error(up.error.message)
+      must(await sb.from('documents').insert({ client_id: clientId, title, storage_path: path, size: file.size, client_visible: visible }))
+    },
+    async updateDoc(id, patch) { must(await sb.from('documents').update(patch).eq('id', id)) },
+    async deleteDoc(doc) {
+      const path = (doc as any).storage_path
+      if (path) await sb.storage.from('documents').remove([path])
+      must(await sb.from('documents').delete().eq('id', doc.id))
     },
   }
 }

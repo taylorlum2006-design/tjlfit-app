@@ -6,13 +6,15 @@ import { Card, CardTitle, Empty, Spinner } from '../../components/ui'
 import { StepsChart, WeightChart } from '../../components/WeeklyCharts'
 import PlanEditor from './PlanEditor'
 import Photos from '../Photos'
+import CoachCalls from './CoachCalls'
+import CoachFiles from './CoachFiles'
 import { shortDate } from '../../lib/dates'
 import { last7, latestWeight } from '../../lib/stats'
 import { fmtW } from '../../lib/units'
 import type { Profile } from '../../types'
 import { IconBack } from '../../components/icons'
 
-const TABS = ['Overview', 'Check-ins', 'Plan', 'Photos'] as const
+const TABS = ['Overview', 'Check-ins', 'Plan', 'Calls', 'Files', 'Photos'] as const
 
 export default function CoachClient() {
   const { id } = useParams()
@@ -39,6 +41,8 @@ function Detail() {
       {tab === 'Overview' && <Overview />}
       {tab === 'Check-ins' && <CheckIns />}
       {tab === 'Plan' && <PlanEditor />}
+      {tab === 'Calls' && <CoachCalls />}
+      {tab === 'Files' && <CoachFiles />}
       {tab === 'Photos' && <Photos />}
     </div>
   )

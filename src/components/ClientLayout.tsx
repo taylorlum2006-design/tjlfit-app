@@ -18,6 +18,8 @@ export default function ClientLayout() {
     { to: '/supplements', label: 'Supplements' },
     { to: '/steps', label: 'Steps' },
     ...(plan?.photos_enabled === false ? [] : [{ to: '/photos', label: 'Photos' }]),
+    { to: '/calls', label: 'Calls' },
+    { to: '/files', label: 'Files' },
     { to: '/me', label: 'Me' },
   ]
 
@@ -52,7 +54,7 @@ export default function ClientLayout() {
             </svg>
           </button>
           {open && (
-            <nav role="menu" className="absolute right-0 mt-2 w-56 rounded-2xl border border-line bg-surface p-1.5 shadow-[0_20px_50px_rgba(0,0,0,.8)]">
+            <nav role="menu" className="absolute right-0 mt-2 w-56 max-h-[75vh] overflow-y-auto rounded-2xl border border-line bg-surface p-1.5 shadow-[0_20px_50px_rgba(0,0,0,.8)]">
               {links.map(l => (
                 <NavLink key={l.to} to={l.to} end={l.end} role="menuitem"
                   className={({ isActive }) => `flex items-center justify-between rounded-xl px-4 py-3 text-[15px] ${isActive ? 'bg-raised text-gold' : 'text-bone hover:bg-raised'}`}>

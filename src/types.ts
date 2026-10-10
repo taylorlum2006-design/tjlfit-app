@@ -67,3 +67,36 @@ export interface WeeklyCheckin {
 }
 
 export interface Photo { id: string; client_id: string; date: string; angle: 'front' | 'side' | 'back'; url: string }
+
+export interface CallSummary { summary: string; decisions: string[]; wins: string[]; concerns: string[]; action_items: string[] }
+
+/** What the client can see. `summary` is only filled in once the coach shares it. */
+export interface Call {
+  id: string
+  client_id: string
+  title: string
+  scheduled_at: string // ISO timestamp
+  meeting_link: string
+  recording_link: string
+  summary: CallSummary | null
+  client_visible: boolean
+}
+
+/** Coach-only: never readable by the client. */
+export interface CallPrivate {
+  call_id: string
+  client_id: string
+  transcript: string
+  notes: string
+  summary_draft: CallSummary | null
+}
+
+export interface Doc {
+  id: string
+  client_id: string
+  title: string
+  url: string
+  size: number
+  client_visible: boolean
+  created_at: string
+}

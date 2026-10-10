@@ -1,5 +1,5 @@
 import type { Api } from './api'
-import type { DailyCheckin, Photo, Plan, Profile, WeeklyCheckin } from '../types'
+import type { Call, CallPrivate, DailyCheckin, Doc, Photo, Plan, Profile, WeeklyCheckin } from '../types'
 import { samplePlan } from './sample'
 import { addDays, mondayOf, todayIn } from '../lib/dates'
 
@@ -7,7 +7,7 @@ import { addDays, mondayOf, todayIn } from '../lib/dates'
 const KEY = 'tjl-demo-v1'
 const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-interface Store { session: string | null; profiles: Profile[]; plans: Plan[]; daily: DailyCheckin[]; weekly: WeeklyCheckin[]; photos: Photo[] }
+interface Store { session: string | null; profiles: Profile[]; plans: Plan[]; daily: DailyCheckin[]; weekly: WeeklyCheckin[]; photos: Photo[]; calls: Call[]; callPrivate: CallPrivate[]; docs: Doc[] }
 
 function seed(): Store {
   const today = todayIn(tz)
@@ -29,10 +29,22 @@ function seed(): Store {
   }
   const a = mk('alex', 'Alex Morgan', 42, 168, -0.06, 9200)
   const b = mk('sam', 'Sam Reid', 28, 151, 0.08, 7400)
-  return { session: null, profiles: [coach, a.p, b.p], plans: [samplePlan('alex'), samplePlan('sam')], daily: [...a.rows, ...b.rows], weekly: [...a.weeks, ...b.weeks], photos: [] }
+  return { session: null, profiles: [coach, a.p, b.p], plans: [samplePlan('alex'), samplePlan('sam')], daily: [...a.rows, ...b.rows], weekly: [...a.weeks, ...b.weeks], photos: [], calls: sampleCalls(today), callPrivate: [], docs: [] }
 }
 
-function load(): Store { try { const s = localStorage.getItem(KEY); if (s) return JSON.parse(s) } catch {} return seed() }
+function sampleCalls(today: string): Call[] {
+  const at = (d: string, h: number) => new Date(`${d}T${String(h).padStart(2, '0')}:00:00`).toISOString()
+  return [
+    { id: 'c1', client_id: 'alex', title: 'Week 6 check-in call', scheduled_at: at(addDays(today, 4), 17), meeting_link: 'https://meet.google.com/', recording_link: '', summary: null, client_visible: true },
+    { id: 'c2', client_id: 'alex', title: 'Week 4 check-in call', scheduled_at: at(addDays(today, -10), 17), meeting_link: '', recording_link: 'https://fathom.video/', client_visible: true,
+      summary: { summary: 'Weight trending down about 0.4 lbs a week, right on target. Energy dips mid-afternoon on rest days.', decisions: ['Carbs stay at 370 g for two more weeks', 'Move Meal 3 earlier on rest days'], wins: ['Hit every session for 3 weeks straight'], concerns: ['Weekend steps drop under 6k'], action_items: ['Walk 20 minutes after lunch on weekends', 'Log weight every morning, even on weekends'] } },
+  ]
+}
+
+function load(): Store {
+  try { const s = localStorage.getItem(KEY); if (s) { const d = JSON.parse(s); return { calls: [], callPrivate: [], docs: [], ...d } } } catch {}
+  return seed()
+}
 let db = load()
 const listeners = new Set<() => void>()
 function save() { try { localStorage.setItem(KEY, JSON.stringify(db)) } catch {} }
@@ -67,4 +79,19 @@ export const demoApi: Api & { signInAs(id: string): void } = {
     db.profiles.push({ id, role: 'client', coach_id: db.session, name, email, timezone: tz, units: 'lbs', start_date: todayIn(tz), daily_reminder_time: '08:00', weekly_checkin_day: 0 })
     db.plans.push(samplePlan(id)); save()
   },
+  async listCalls(clientId) { return db.calls.filter(c => c.client_id === clientId).sort((a, b) => b.scheduled_at.localeCompare(a.scheduled_at)) },
+  async saveCall(call) { await wait(); db.calls = [...db.calls.filter(c => c.id !== call.id), call]; save() },
+  async deleteCall(id) { db.calls = db.calls.filter(c => c.id !== id); db.callPrivate = db.callPrivate.filter(c => c.call_id !== id); save() },
+  async getCallPrivate(callId) { return db.callPrivate.find(c => c.call_id === callId) ?? null },
+  async saveCallPrivate(row) { db.callPrivate = [...db.callPrivate.filter(c => c.call_id !== row.call_id), row]; save() },
+  async summarize() { throw new Error('AI summaries switch on once the app is connected to Supabase and your Anthropic key is added (see SETUP.md). You can still type a summary in by hand.') },
+  async listDocs(clientId) { return db.docs.filter(d => d.client_id === clientId).sort((a, b) => b.created_at.localeCompare(a.created_at)) },
+  async uploadDoc(clientId, title, file, visible) {
+    if (file.size > 3_000_000) throw new Error('Preview mode only holds files under 3 MB. Real uploads allow much larger files.')
+    const url: string = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result as string); fr.readAsDataURL(file) })
+    db.docs.push({ id: crypto.randomUUID(), client_id: clientId, title, url, size: file.size, client_visible: visible, created_at: new Date().toISOString() })
+    try { save() } catch { throw new Error('Preview storage is full. Delete a file first.') }
+  },
+  async updateDoc(id, patch) { db.docs = db.docs.map(d => (d.id === id ? { ...d, ...patch } : d)); save() },
+  async deleteDoc(doc) { db.docs = db.docs.filter(d => d.id !== doc.id); save() },
 }

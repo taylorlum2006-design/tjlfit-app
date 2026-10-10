@@ -14,7 +14,7 @@ Rename the site in **Site configuration → Change site name** (e.g. `tjlfit`).
 ## 2. Supabase (real accounts and data)
 
 1. Go to supabase.com, sign up with GitHub, click **New project**. Name it `tjlfit`, set a database password and save it somewhere safe, pick the region closest to most clients.
-2. When it's ready, open **SQL Editor → New query**. Copy everything in `supabase/migrations/0001_init.sql`, paste it in, click **Run**. You should see "Success".
+2. When it's ready, open **SQL Editor → New query**. Copy everything in `supabase/migrations/0001_init.sql`, paste it in, click **Run**. You should see "Success". Then do the same with `supabase/migrations/0002_calls_files.sql` (calls and files).
 3. Open **Authentication → Sign In / Providers**. Make sure **Email** is on, and turn **Allow new users to sign up** off (clients only get in through your invite).
 4. Open **Authentication → URL Configuration**. Set **Site URL** to your Netlify link (e.g. `https://tjlfit.netlify.app`) and add the same link under **Redirect URLs**.
 5. Open **Project Settings → API**. You need three values: the **Project URL**, the **anon public** key, and the **service_role** key. Never paste these into chat.
@@ -29,6 +29,8 @@ In Netlify: **Site configuration → Environment variables → Add a variable**.
 | `VITE_SUPABASE_ANON_KEY` | Supabase anon public key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service_role key (secret) |
 | `VITE_COACH_NAME` | Taylor |
+| `VITE_BOOKING_LINK` | Your booking link, e.g. Calendly (optional, shows a "Book a call" button for clients) |
+| `ANTHROPIC_API_KEY` | From console.anthropic.com → API keys (turns on "Summarize with AI" for calls) |
 
 Then **Deploys → Trigger deploy → Deploy site**. The app is now live with real logins.
 
@@ -43,6 +45,12 @@ Then **Deploys → Trigger deploy → Deploy site**. The app is now live with re
    ```
 
 4. Reload the app. You now see the coach dashboard and can invite clients from there.
+
+## Calls and files
+
+- **Calls** (coach view, inside a client): add upcoming calls with the meeting link, and past calls with the Fathom or Granola recording link. Paste the transcript and tap **Summarize with AI**, edit anything, then **Save and share summary** or keep it private. Transcripts and private notes are never visible to the client. **Add action items to their daily goals** drops them into the client's Goals checklist.
+- **Files** (coach view, inside a client): upload PDFs up to 50 MB. Each file is either shared with the client (they see it under Files) or coach only.
+- Each summary costs roughly a few cents on your Anthropic account.
 
 ## How changes work
 

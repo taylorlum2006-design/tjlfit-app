@@ -2,6 +2,7 @@
 export const brand = {
   appName: 'TJL Fit',
   coachName: import.meta.env.VITE_COACH_NAME || 'Taylor',
+  bookingLink: import.meta.env.VITE_BOOKING_LINK || '', // e.g. your Calendly link
   logo: '/brand/logo-mark.png',
   colors: {
     bg: '#000000',

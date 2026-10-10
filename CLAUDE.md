@@ -118,10 +118,10 @@ At the end of each phase: run it, test it at phone width, fix issues, commit, de
 
 - Coach name shown in the app
 - Workout tab content (waiting on screenshots, also Goals, Progress, and the cut-off tab)
-- Default visibility of call summaries for clients
 - Domain (e.g. app.tjlfit.com)
 
 ## Status
 
 - **Done (Phase 1 + most of 2):** Vite/React app, brand tokens (`src/brand.ts`, CSS variables in `src/index.css`), self-hosted fonts, logo splash, magic-link login, client tabs (Home, Check-in daily/weekly, Nutrition with day variants and pick-one meals, Progress with weekly average weight and steps charts, Goals, Supplements, Steps, Photos with compare, Me), coach dashboard (client list with flags, client detail with overview, check-ins, plan editor, photos), invite function, Supabase schema with RLS (`supabase/migrations/0001_init.sql`), preview mode when no Supabase keys are set (`src/data/demo.ts`). Setup steps for the owner are in `SETUP.md`.
-- **Next:** Workout tab (waiting on screenshots), Phase 3 reminders, Phase 4 calls, Phase 5 backups.
+- **Done (Phase 4):** Calls (`calls` client-visible table + coach-only `call_private` for transcript, notes, draft summary; summary copied to `calls.summary` only when shared), AI summaries via `netlify/functions/summarize-call.mjs` (model from `ANTHROPIC_MODEL`, default `claude-sonnet-5-5`), action items to Goals, client Calls page with next call and booking link (`VITE_BOOKING_LINK`). Files: per-client PDFs in private `documents` bucket, shared or coach only (`supabase/migrations/0002_calls_files.sql`). Navigation is a top-right dropdown.
+- **Next:** Workout tab (waiting on screenshots), Phase 3 reminders, Phase 5 backups, optional Fathom webhook import.
