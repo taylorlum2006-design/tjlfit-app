@@ -23,16 +23,20 @@ The owner is not a developer. Explain setup steps click by click, never assume t
 
 ## Brand
 
-Reference: bold condensed uppercase headlines in off-white on pure black, muted grey body text, generous spacing. Feels like a premium performance brand, not a SaaS dashboard.
+Reference: the TJL Fit website. Pure black background, huge heavy condensed uppercase headlines in off-white with a soft white glow on the key line, clean sans body text in light grey, a faint constellation/particle line pattern in the background, and a gold italic serif used sparingly for emphasis words (e.g. "looks like."). Premium performance brand, not a SaaS dashboard.
 
-- Background `#000000`, raised surfaces `#141414`, borders `#262626`
-- Primary text `#F4F2EE`, secondary text `#9A9A96`
-- Accent: TBD (owner deciding between one accent color and fully monochrome). Put it in one token so it can change in one place.
-- Display font: Barlow Condensed, weight 800, uppercase, tight leading
-- Body font: Barlow, regular and medium
-- Logo: `/public/brand/TJL_LOGO.png` (white on black). Use on the loading screen (short logo reveal, respect reduced motion), in the app header, as the PWA app icon and splash, and in the coach dashboard. Owner may supply a transparent PNG or SVG later.
+- Background `#000000`, raised surfaces `#0F0F0F`, borders `#222222`
+- Primary text `#F2F0EB`, secondary text `#A3A19B`
+- Accent gold `#E8C25B` (slightly brighter than the website's muted gold). Used for progress, active states, chart lines, primary data numbers, and the italic serif emphasis. Keep it in one token.
+- Primary buttons: off-white `#F2F0EB` fill with black text, rounded (like the website's "Book a call")
+- Display font: Anton, uppercase, tight leading. Optional soft glow (text-shadow) on hero lines only
+- Body font: Inter
+- Emphasis font: Instrument Serif italic in gold, for one or two words per screen at most
+- Logo: `/public/brand/TJL_LOGO.png` (white on black). Use on the loading screen (short logo reveal, respect reduced motion), in the app header, as the PWA app icon and splash, and in the coach dashboard.
+- Subtle constellation background on the loading screen and login only, not behind data screens
 - All brand values live in one place (`src/brand.ts` and CSS variables) so a rebrand is a few lines.
 - UI copy: sentence case for body and buttons, plain verbs, no em dashes.
+- Coach name default: Taylor (configurable)
 
 ## Users and access
 
@@ -112,8 +116,12 @@ At the end of each phase: run it, test it at phone width, fix issues, commit, de
 
 ## Open decisions (ask the owner when you reach them)
 
-- Accent color or fully monochrome
 - Coach name shown in the app
 - Workout tab content (waiting on screenshots, also Goals, Progress, and the cut-off tab)
 - Default visibility of call summaries for clients
 - Domain (e.g. app.tjlfit.com)
+
+## Status
+
+- **Done (Phase 1 + most of 2):** Vite/React app, brand tokens (`src/brand.ts`, CSS variables in `src/index.css`), self-hosted fonts, logo splash, magic-link login, client tabs (Home, Check-in daily/weekly, Nutrition with day variants and pick-one meals, Progress with weekly average weight and steps charts, Goals, Supplements, Steps, Photos with compare, Me), coach dashboard (client list with flags, client detail with overview, check-ins, plan editor, photos), invite function, Supabase schema with RLS (`supabase/migrations/0001_init.sql`), preview mode when no Supabase keys are set (`src/data/demo.ts`). Setup steps for the owner are in `SETUP.md`.
+- **Next:** Workout tab (waiting on screenshots), Phase 3 reminders, Phase 4 calls, Phase 5 backups.
