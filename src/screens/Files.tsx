@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../data'
 import { useClient } from '../state'
 import { Card, Empty, PageTitle, Spinner } from '../components/ui'
-import { fileSize } from '../lib/calls'
+import { fileSize, openFile } from '../lib/calls'
 import type { Doc } from '../types'
 
 export default function Files() {
@@ -17,11 +17,11 @@ export default function Files() {
         <ul className="card p-0 divide-y divide-line">
           {docs.map(d => (
             <li key={d.id}>
-              <a href={d.url} target="_blank" rel="noreferrer" className="flex items-center gap-4 px-5 py-4">
+              <button type="button" onClick={() => openFile(d.url)} className="w-full text-left flex items-center gap-4 px-5 py-4">
                 <span className="h-11 w-9 shrink-0 rounded-md border border-line bg-raised flex items-center justify-center text-[10px] font-bold text-gold">PDF</span>
                 <div className="flex-1 min-w-0"><p className="font-semibold truncate">{d.title}</p><p className="text-sm text-mute">{new Date(d.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {fileSize(d.size)}</p></div>
                 <span className="text-sm text-gold">Open</span>
-              </a>
+              </button>
             </li>
           ))}
         </ul>

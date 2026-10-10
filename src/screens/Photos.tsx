@@ -5,6 +5,7 @@ import { Card, CardTitle, Empty, PageTitle, useToast } from '../components/ui'
 import { compressImage } from '../lib/image'
 import { longDate } from '../lib/dates'
 import type { Photo } from '../types'
+import { openFile } from '../lib/calls'
 import { IconPlus } from '../components/icons'
 
 const ANGLES: Photo['angle'][] = ['front', 'side', 'back']
@@ -79,7 +80,7 @@ export default function Photos() {
           <div key={d} className="mb-5 last:mb-0">
             <p className="text-sm text-mute mb-2">{longDate(d)}</p>
             <div className="grid grid-cols-3 gap-2">
-              {ANGLES.map(a => { const p = photos.find(x => x.date === d && x.angle === a); return p ? <a key={a} href={p.url} target="_blank" rel="noreferrer"><img src={p.url} alt={`${a} ${d}`} className="rounded-xl aspect-[3/4] object-cover w-full" /></a> : <div key={a} className="rounded-xl aspect-[3/4] bg-raised" /> })}
+              {ANGLES.map(a => { const p = photos.find(x => x.date === d && x.angle === a); return p ? <button key={a} type="button" onClick={() => openFile(p.url)}><img src={p.url} alt={`${a} ${d}`} className="rounded-xl aspect-[3/4] object-cover w-full" /></button> : <div key={a} className="rounded-xl aspect-[3/4] bg-raised" /> })}
             </div>
           </div>
         ))}

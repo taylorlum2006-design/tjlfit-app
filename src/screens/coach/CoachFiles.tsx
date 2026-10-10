@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { api } from '../../data'
 import { useClient } from '../../state'
 import { Badge, Card, CardTitle, Empty, Field, Spinner, useToast } from '../../components/ui'
-import { fileSize } from '../../lib/calls'
+import { fileSize, openFile } from '../../lib/calls'
 import type { Doc } from '../../types'
 
 export default function CoachFiles() {
@@ -47,10 +47,10 @@ export default function CoachFiles() {
           <ul className="divide-y divide-line">
             {docs.map(d => (
               <li key={d.id} className="py-3.5 flex items-center gap-3">
-                <a href={d.url} target="_blank" rel="noreferrer" className="flex-1 min-w-0">
+                <button type="button" onClick={() => openFile(d.url)} className="flex-1 min-w-0 text-left">
                   <p className="font-semibold truncate">{d.title}</p>
                   <p className="text-sm text-mute">{new Date(d.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {fileSize(d.size)}</p>
-                </a>
+                </button>
                 <button onClick={async () => { await api.updateDoc(d.id, { client_visible: !d.client_visible }); load() }}>{d.client_visible ? <Badge>Shared</Badge> : <Badge tone="mute">Coach only</Badge>}</button>
                 <button className="text-mute px-2" aria-label={`Delete ${d.title}`} onClick={async () => { if (confirm(`Delete ${d.title}?`)) { await api.deleteDoc(d); load() } }}>✕</button>
               </li>
