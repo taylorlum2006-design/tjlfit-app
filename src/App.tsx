@@ -8,7 +8,6 @@ import Home from './screens/Home'
 import CheckIn from './screens/CheckIn'
 import Nutrition from './screens/Nutrition'
 import Progress from './screens/Progress'
-import More from './screens/More'
 import Goals from './screens/Goals'
 import Supplements from './screens/Supplements'
 import Steps from './screens/Steps'
@@ -38,7 +37,6 @@ function Routed() {
           <Route path="checkin" element={<CheckIn />} />
           <Route path="nutrition" element={<Nutrition />} />
           <Route path="progress" element={<Progress />} />
-          <Route path="more" element={<More />} />
           <Route path="goals" element={<Goals />} />
           <Route path="supplements" element={<Supplements />} />
           <Route path="steps" element={<Steps />} />

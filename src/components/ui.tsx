@@ -62,7 +62,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastCtx.Provider value={show}>
       {children}
-      <div aria-live="polite" className="fixed inset-x-0 bottom-24 flex justify-center pointer-events-none z-50">
+      <div aria-live="polite" className="fixed inset-x-0 bottom-8 flex justify-center pointer-events-none z-50">
         {msg && <div className="rounded-full bg-bone text-black px-4 py-2 text-sm font-medium shadow-lg">{msg}</div>}
       </div>
     </ToastCtx.Provider>

@@ -59,7 +59,7 @@ Reference: the TJL Fit website. Pure black background, huge heavy condensed uppe
 11. **Calls:** upcoming call (time, meeting link, coach booking link), past calls with recording link and the client-visible summary and action items. Visibility of summaries is a coach setting per call.
 12. **Me:** name, units (lbs/kg), time zone, notification settings, install-app instructions.
 
-Navigation: on mobile, a bottom bar with the 4-5 most used tabs and a "More" sheet for the rest. No clipped or crammed tab labels.
+Navigation: a menu button in the top right of the header (shows the current page name) that drops down a list of every section. No bottom bar. No clipped or crammed labels.
 
 ## Coach dashboard
 
