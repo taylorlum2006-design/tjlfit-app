@@ -1,71 +1,96 @@
-# Setup guide
+# Go-live guide
 
-The app runs in **preview mode** (sample data, stored only in your browser) until Supabase is connected. Do the Netlify part first to see it live, then connect Supabase.
+Netlify is already done (the app is live at `tjlfitapp.netlify.app` in preview mode with sample data). These steps switch it to real accounts. Total time: about 30 minutes.
 
-## 1. Netlify (see the app live)
+Never paste passwords or keys into a chat. They only go into Supabase and Netlify.
 
-1. Go to netlify.com and sign up with GitHub.
-2. **Add new site → Import an existing project → GitHub →** pick `tjlfit-app`.
-3. Leave the build settings as they are (they come from `netlify.toml`) and click **Deploy**.
-4. After about a minute you get a link like `something.netlify.app`. Open it on your phone to see the client app with sample data. Add `/coach` to the end of the link for the coach dashboard.
+## 1. Create the database (Supabase, 10 min)
 
-Rename the site in **Site configuration → Change site name** (e.g. `tjlfit`).
+1. Go to **supabase.com**, sign up with GitHub, click **New project**. Name it `tjlfit`, set a database password (save it in your password manager), and pick the region closest to most clients. Wait for it to finish setting up.
+2. Open **SQL Editor → New query**. Open `supabase/setup-all.sql` from the GitHub repo, copy all of it, paste it in, click **Run**. You should see "Success. No rows returned".
+3. **Authentication → Sign In / Providers → Email:** make sure Email is on. Turn **Allow new users to sign up** off (clients can only get in through your invite).
+4. **Authentication → URL Configuration:** set **Site URL** to `https://tjlfitapp.netlify.app` and add the same link under **Redirect URLs**.
 
-## 2. Supabase (real accounts and data)
+## 2. Let the app send emails (5 min)
 
-1. Go to supabase.com, sign up with GitHub, click **New project**. Name it `tjlfit`, set a database password and save it somewhere safe, pick the region closest to most clients.
-2. When it's ready, open **SQL Editor → New query**. Copy everything in `supabase/migrations/0001_init.sql`, paste it in, click **Run**. You should see "Success". Then do the same with `supabase/migrations/0002_calls_files.sql` (calls and files).
-3. Open **Authentication → Sign In / Providers**. Make sure **Email** is on, and turn **Allow new users to sign up** off (clients only get in through your invite).
-4. Open **Authentication → URL Configuration**. Set **Site URL** to your Netlify link (e.g. `https://tjlfit.netlify.app`) and add the same link under **Redirect URLs**.
-5. Open **Authentication → Emails → Magic Link** and replace the message with this, then save. It lets clients sign in with a 6-digit code, which is what works inside the iPhone home-screen app:
+Supabase's built-in email only sends to people on your Supabase team, a couple per hour. Clients wouldn't get their invites or sign-in codes. Connect your own email:
 
-   ```html
-   <h2>Your TJL Fit sign-in code</h2>
-   <p style="font-size:28px;letter-spacing:6px"><strong>{{ .Token }}</strong></p>
-   <p>Or tap <a href="{{ .ConfirmationURL }}">this link</a> to sign in on this device.</p>
-   ```
+**Easiest: a Gmail account** (no domain needed, up to ~500 emails a day)
 
-6. Open **Project Settings → API**. You need three values: the **Project URL**, the **anon public** key, and the **service_role** key. Never paste these into chat.
+1. On that Google account, turn on **2-Step Verification**, then go to **myaccount.google.com/apppasswords** and create an app password called "TJL Fit". Copy the 16-character password.
+2. In Supabase: **Authentication → Emails → SMTP Settings**, turn on **Enable custom SMTP** and fill in:
+   - Sender email: the Gmail address. Sender name: `TJL Fit`
+   - Host: `smtp.gmail.com`. Port: `587`
+   - Username: the Gmail address. Password: the app password
+3. Save.
 
-## 3. Connect them
+(If you own a domain like tjlfit.com, Resend is the more professional option: emails come from `hello@tjlfit.com`. Ask and I'll walk you through it.)
 
-In Netlify: **Site configuration → Environment variables → Add a variable**. Add:
+## 3. Set the email messages (3 min)
+
+In **Authentication → Emails → Templates**:
+
+**Invite user** (what a new client receives). Subject: `Your TJL Fit app is ready`
+
+```html
+<h2>Your TJL Fit app is ready</h2>
+<p><a href="{{ .ConfirmationURL }}">Tap here to open your plan.</a></p>
+<p><strong>On iPhone:</strong> once it opens in Safari, tap the Share button, then <strong>Add to Home Screen</strong>. Open the app from your home screen and sign in with this email address. You'll get a code to type in, then you're in for good.</p>
+```
+
+**Magic Link** (the sign-in code). Subject: `Your TJL Fit sign-in code`
+
+```html
+<h2>Your TJL Fit sign-in code</h2>
+<p style="font-size:28px;letter-spacing:6px"><strong>{{ .Token }}</strong></p>
+<p>Or tap <a href="{{ .ConfirmationURL }}">this link</a> to sign in on this device.</p>
+```
+
+## 4. Connect the app to the database (5 min)
+
+1. In Supabase: **Project Settings → API Keys**. You need the **Project URL** (under Project Settings → Data API if it's not on that page), the **publishable** key (older projects call it **anon**), and the **secret** key (older projects call it **service_role**).
+2. In Netlify: **Project configuration → Environment variables → Add a variable**, one at a time:
 
 | Key | Value |
 |---|---|
 | `VITE_SUPABASE_URL` | Supabase Project URL |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anon public key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service_role key (secret) |
+| `VITE_SUPABASE_ANON_KEY` | Publishable (anon) key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Secret (service_role) key. Keep this private. |
 | `VITE_COACH_NAME` | Taylor |
-| `VITE_BOOKING_LINK` | Your booking link, e.g. Calendly (optional, shows a "Book a call" button for clients) |
-| `ANTHROPIC_API_KEY` | From console.anthropic.com → API keys (turns on "Summarize with AI" for calls) |
+| `VITE_BOOKING_LINK` | Your booking link, e.g. Calendly (optional) |
+| `ANTHROPIC_API_KEY` | From console.anthropic.com → API keys (for call summaries, optional) |
 
-Then **Deploys → Trigger deploy → Deploy site**. The app is now live with real logins.
+3. **Deploys → Trigger deploy → Deploy project.** After a minute the sample data is gone and the app shows a sign-in screen.
 
-## 4. Make the coach account
+## 5. Make your coach account (2 min)
 
-1. In Supabase: **Authentication → Users → Add user → Send invitation**, enter the coach email.
-2. Open the email and click the link. You land in the app as a client.
-3. In **SQL Editor**, run this (with the coach's email):
+1. In Supabase: **Authentication → Users → Add user → Send invitation**, enter your own email.
+2. In **SQL Editor**, run this with your email:
 
    ```sql
-   update public.profiles set role = 'coach', name = 'Taylor' where email = 'coach@email.com';
+   update public.profiles set role = 'coach', name = 'Taylor' where email = 'you@email.com';
    ```
 
-4. Go to your link with `/coach` on the end (e.g. `tjlfitapp.netlify.app/coach`). You now see the coach dashboard and can invite clients from there.
+3. Go to `tjlfitapp.netlify.app/coach`, enter your email, type the code from your inbox. You're in the coach dashboard.
 
-## What clients see
+## 6. Test it as a client yourself
 
-Clients only ever get the client app. Even if they type `/coach`, they're sent back to their own plan, and the database blocks them from anyone else's data.
+1. In the coach dashboard, invite yourself as a client using a second email. With Gmail you can use a `+` address that lands in the same inbox, e.g. `yourname+test@gmail.com`.
+2. On your phone, open the invite email, add the app to your home screen, open it, sign in with the `+test` address and the code.
+3. Try it: log a daily check-in, steps, water, a photo, a weekly check-in.
+4. Back in the coach dashboard, open the test client: check the data shows up, edit the plan, add a call, upload a file. Reopen the phone app and check the changes appear.
+5. Delete the test client: open them, **Overview** tab, scroll down, **Remove client and delete all their data**, type DELETE. Everything about them is wiped.
 
-They sign in once per device with the code from their email. After that the app opens straight to their plan, with a "Good morning, name" screen the first time they open it each day.
+## 7. Invite your real clients
 
-## Calls and files
+Coach dashboard → **Invite a client** → name and email. They get the invite email, add the app to their home screen, sign in once, and from then on it opens straight to their plan. Build each client's plan in their **Plan** tab.
 
-- **Calls** (coach view, inside a client): add upcoming calls with the meeting link, and past calls with the Fathom or Granola recording link. Paste the transcript and tap **Summarize with AI**, edit anything, then **Save and share summary** or keep it private. Transcripts and private notes are never visible to the client. **Add action items to their daily goals** drops them into the client's Goals checklist.
-- **Files** (coach view, inside a client): upload PDFs up to 50 MB. Each file is either shared with the client (they see it under Files) or coach only.
-- Each summary costs roughly a few cents on your Anthropic account.
+---
 
-## How changes work
+## Day to day
 
-Every push to the `main` branch on GitHub redeploys the app automatically. Client data lives in Supabase and is never touched by a redeploy.
+- **What clients see:** only the client app. If they type `/coach` they're sent back to their plan, and the database blocks them from anyone else's data.
+- **Calls:** inside a client, add calls with the meeting link and Fathom/Granola recording link. Paste the transcript, tap **Summarize with AI**, edit, then share it or keep it private. Transcripts and private notes are never visible to the client.
+- **Files:** inside a client, upload PDFs up to 50 MB, shared or coach only.
+- **Removing a client:** Overview tab → Remove client. Permanent.
+- **Changes to the app:** every push to `main` on GitHub redeploys automatically in about a minute. Client data lives in Supabase and is never touched by a redeploy.

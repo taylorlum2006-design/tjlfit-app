@@ -14,7 +14,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const refresh = useCallback(async () => {
     const id = await api.currentUserId()
-    setMe(id ? await api.getProfile(id) : null)
+    let p = id ? await api.getProfile(id) : null
+    // New accounts start on UTC. Pick up the device's time zone so reminders and "today" are right.
+    if (p && api.mode === 'live' && p.timezone === 'UTC') {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+      if (tz && tz !== 'UTC') { try { await api.updateProfile(p.id, { timezone: tz }); p = { ...p, timezone: tz } } catch {} }
+    }
+    setMe(p)
   }, [])
   useEffect(() => {
     const minSplash = new Promise(r => setTimeout(r, 1300))

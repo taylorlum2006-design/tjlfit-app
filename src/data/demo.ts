@@ -80,6 +80,12 @@ export const demoApi: Api = {
     db.profiles.push({ id, role: 'client', coach_id: 'coach', name, email, timezone: tz, units: 'lbs', start_date: todayIn(tz), daily_reminder_time: '08:00', weekly_checkin_day: 0 })
     db.plans.push(samplePlan(id)); save()
   },
+  async removeClient(id) {
+    db.profiles = db.profiles.filter(p => p.id !== id); db.plans = db.plans.filter(p => p.client_id !== id)
+    db.daily = db.daily.filter(r => r.client_id !== id); db.weekly = db.weekly.filter(r => r.client_id !== id)
+    db.photos = db.photos.filter(r => r.client_id !== id); db.calls = db.calls.filter(r => r.client_id !== id)
+    db.docs = db.docs.filter(r => r.client_id !== id); save()
+  },
   async listCalls(clientId) { return db.calls.filter(c => c.client_id === clientId).sort((a, b) => b.scheduled_at.localeCompare(a.scheduled_at)) },
   async saveCall(call) { await wait(); db.calls = [...db.calls.filter(c => c.id !== call.id), call]; save() },
   async deleteCall(id) { db.calls = db.calls.filter(c => c.id !== id); db.callPrivate = db.callPrivate.filter(c => c.call_id !== id); save() },

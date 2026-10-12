@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { api } from '../../data'
 import { ClientProvider, useClient } from '../../state'
-import { Card, CardTitle, Empty, Spinner } from '../../components/ui'
+import { Card, CardTitle, Empty, Spinner, useToast } from '../../components/ui'
 import { StepsChart, WeightChart } from '../../components/WeeklyCharts'
 import PlanEditor from './PlanEditor'
 import Photos from '../Photos'
@@ -44,6 +44,7 @@ function Detail() {
       {tab === 'Calls' && <CoachCalls />}
       {tab === 'Files' && <CoachFiles />}
       {tab === 'Photos' && <Photos />}
+      {tab === 'Overview' && <RemoveClient />}
     </div>
   )
 }
@@ -108,6 +109,26 @@ function CheckIns() {
           </div>
         ))}
       </Card>
+    </div>
+  )
+}
+
+function RemoveClient() {
+  const { profile } = useClient()
+  const nav = useNavigate()
+  const toast = useToast()
+  const [busy, setBusy] = useState(false)
+  async function remove() {
+    const label = profile.name || profile.email
+    const typed = prompt(`This permanently deletes ${label}'s account, check-ins, photos, calls and files. It can't be undone.\n\nType DELETE to confirm.`)
+    if (typed?.trim().toUpperCase() !== 'DELETE') return
+    setBusy(true)
+    try { await api.removeClient(profile.id); toast(`${label} removed`); nav('/coach') }
+    catch (e: any) { toast(e.message); setBusy(false) }
+  }
+  return (
+    <div className="mt-10 pt-6 border-t border-line">
+      <button className="text-sm text-danger" disabled={busy} onClick={remove}>{busy ? 'Removing…' : 'Remove client and delete all their data'}</button>
     </div>
   )
 }

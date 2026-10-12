@@ -49,6 +49,15 @@ export function supabaseApi(url: string, key: string): Api {
       })
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Invite failed')
     },
+    async removeClient(clientId) {
+      const { data } = await sb.auth.getSession()
+      const res = await fetch('/.netlify/functions/remove-client', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${data.session?.access_token}` },
+        body: JSON.stringify({ clientId }),
+      })
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Could not remove client')
+    },
     async listCalls(clientId) { return must(await sb.from('calls').select('*').eq('client_id', clientId).order('scheduled_at', { ascending: false })) ?? [] },
     async saveCall(call) { must(await sb.from('calls').upsert(call)) },
     async deleteCall(id) { must(await sb.from('calls').delete().eq('id', id)) },

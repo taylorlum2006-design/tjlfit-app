@@ -19,6 +19,7 @@ export interface Api {
   listPhotos(clientId: string): Promise<Photo[]>
   uploadPhoto(clientId: string, date: string, angle: Photo['angle'], blob: Blob): Promise<void>
   inviteClient(email: string, name: string): Promise<void>
+  removeClient(clientId: string): Promise<void>
   listCalls(clientId: string): Promise<Call[]>
   saveCall(call: Call): Promise<void>
   deleteCall(id: string): Promise<void>

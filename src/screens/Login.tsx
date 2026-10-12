@@ -41,8 +41,8 @@ export default function Login() {
           </form>
         ) : (
           <form onSubmit={verify} className="space-y-3">
-            <p className="text-sm text-mute">We emailed a 6-digit code to <span className="text-bone">{email}</span>. Enter it here. You can also tap the link in that email.</p>
-            <input className="input text-center text-2xl tracking-[0.4em]" inputMode="numeric" autoComplete="one-time-code" maxLength={6} required placeholder="000000" value={code} onChange={e => setCode(e.target.value.replace(/\D/g, ''))} />
+            <p className="text-sm text-mute">We emailed a sign-in code to <span className="text-bone">{email}</span>. Enter it here. You can also tap the link in that email.</p>
+            <input className="input text-center text-2xl tracking-[0.4em]" inputMode="numeric" autoComplete="one-time-code" maxLength={10} required placeholder="000000" value={code} onChange={e => setCode(e.target.value.replace(/\D/g, ''))} />
             {error && <p className="text-sm text-danger">{error}</p>}
             <button className="btn" disabled={busy || code.length < 6}>{busy ? 'Checking…' : 'Sign in'}</button>
             <button type="button" className="text-sm text-mute w-full py-2" onClick={() => { setStep('email'); setCode(''); setError('') }}>Use a different email</button>
