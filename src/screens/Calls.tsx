@@ -4,6 +4,7 @@ import { brand } from '../brand'
 import { useClient } from '../state'
 import { Card, CardTitle, Empty, PageTitle, Spinner } from '../components/ui'
 import SummaryView from '../components/SummaryView'
+import FilesSection from './Files'
 import { callTime, isUpcoming } from '../lib/calls'
 import type { Call } from '../types'
 
@@ -18,7 +19,7 @@ export default function Calls() {
 
   return (
     <div className="space-y-4">
-      <PageTitle>Calls</PageTitle>
+      <PageTitle sub="Your calls, recaps and files from your coach">Calls & files</PageTitle>
       <Card>
         <CardTitle>Next call</CardTitle>
         {next ? (
@@ -41,6 +42,7 @@ export default function Calls() {
           {c.summary ? <SummaryView s={c.summary} /> : <p className="text-sm text-mute">Summary coming soon.</p>}
         </Card>
       ))}
+      <FilesSection />
     </div>
   )
 }

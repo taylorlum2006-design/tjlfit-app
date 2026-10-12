@@ -13,13 +13,11 @@ export default function ClientLayout() {
     { to: '/', label: 'Home', end: true },
     { to: '/checkin', label: 'Check-in' },
     { to: '/nutrition', label: 'Nutrition' },
-    { to: '/progress', label: 'Progress' },
-    { to: '/goals', label: 'Goals' },
+    { to: '/progress', label: 'Progress & goals' },
     { to: '/supplements', label: 'Supplements' },
     { to: '/steps', label: 'Steps' },
     ...(plan?.photos_enabled === false ? [] : [{ to: '/photos', label: 'Photos' }]),
-    { to: '/calls', label: 'Calls' },
-    { to: '/files', label: 'Files' },
+    { to: '/calls', label: 'Calls & files' },
     { to: '/me', label: 'Me' },
   ]
 

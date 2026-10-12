@@ -80,7 +80,7 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Link to="/goals" className="card block">
+        <Link to="/progress#goals" className="card block">
           <p className="label">Goals</p>
           <p className="num text-4xl mt-3">{todayRow.goals_done.length}<span className="text-mute">/{goalsTotal}</span></p>
           <p className="text-xs text-mute mt-2">done today</p>

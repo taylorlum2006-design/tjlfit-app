@@ -35,7 +35,7 @@ export interface Api {
 export const emptySummary = (): CallSummary => ({ summary: '', decisions: [], wins: [], concerns: [], action_items: [] })
 
 export function emptyDaily(clientId: string, date: string): DailyCheckin {
-  return { client_id: clientId, date, weight: null, rested: null, train_desire: null, digestion: '', untracked_food: '', steps: null, water: null, goals_done: [], supplements_taken: [], submitted: false }
+  return { client_id: clientId, date, weight: null, rested: null, training_day: null, train_desire: null, hunger: null, digestion: '', untracked_food: '', steps: null, water: null, goals_done: [], supplements_taken: [], submitted: false }
 }
 
 export function emptyPlan(clientId: string): Plan {

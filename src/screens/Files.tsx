@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react'
 import { api } from '../data'
 import { useClient } from '../state'
-import { Card, Empty, PageTitle, Spinner } from '../components/ui'
+import { Card, Empty, Spinner } from '../components/ui'
 import { fileSize, openFile } from '../lib/calls'
 import type { Doc } from '../types'
 
-export default function Files() {
+export default function FilesSection() {
   const { profile } = useClient()
   const [docs, setDocs] = useState<Doc[] | null>(null)
   useEffect(() => { api.listDocs(profile.id).then(d => setDocs(d.filter(x => x.client_visible))) }, [profile.id])
   if (!docs) return <Spinner />
   return (
     <div className="space-y-4">
-      <PageTitle sub="Plans and guides from your coach">Files</PageTitle>
+      <h2 className="h-display text-3xl pt-4">Files</h2>
       {!docs.length ? <Card><Empty>No files yet.</Empty></Card> : (
         <ul className="card p-0 divide-y divide-line">
           {docs.map(d => (

@@ -1,16 +1,16 @@
 import { useClient } from '../state'
-import { Bar, Card, Empty, PageTitle } from '../components/ui'
+import { Bar, Card, CardTitle, Empty } from '../components/ui'
 
-export default function Goals() {
+export default function GoalsSection() {
   const { plan, todayRow, today, saveDay, readOnly } = useClient()
   const goals = plan?.goals ?? []
   const done = new Set(todayRow.goals_done)
-  if (!goals.length) return <><PageTitle>Goals</PageTitle><Empty>Your coach hasn't set daily goals yet.</Empty></>
+  if (!goals.length) return <Card><CardTitle>Today's goals</CardTitle><Empty>Your coach hasn't set daily goals yet.</Empty></Card>
   const toggle = (id: string) => saveDay(today, { goals_done: done.has(id) ? [...done].filter(x => x !== id) : [...done, id] })
   return (
-    <div className="space-y-4">
-      <PageTitle sub="Your daily non-negotiables">Goals</PageTitle>
+    <div id="goals" className="space-y-4 scroll-mt-24">
       <Card>
+        <CardTitle>Today's goals</CardTitle>
         <div className="flex justify-between items-baseline mb-3"><p className="num text-4xl">{done.size}<span className="text-mute">/{goals.length}</span></p><p className="text-sm text-mute">done today</p></div>
         <Bar value={done.size} max={goals.length} />
       </Card>

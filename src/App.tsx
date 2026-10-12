@@ -9,13 +9,11 @@ import Home from './screens/Home'
 import CheckIn from './screens/CheckIn'
 import Nutrition from './screens/Nutrition'
 import Progress from './screens/Progress'
-import Goals from './screens/Goals'
 import Supplements from './screens/Supplements'
 import Steps from './screens/Steps'
 import Photos from './screens/Photos'
 import Me from './screens/Me'
 import Calls from './screens/Calls'
-import Files from './screens/Files'
 import CoachHome from './screens/coach/CoachHome'
 import CoachClient from './screens/coach/CoachClient'
 
@@ -41,12 +39,12 @@ function Routed() {
           <Route path="checkin" element={<CheckIn />} />
           <Route path="nutrition" element={<Nutrition />} />
           <Route path="progress" element={<Progress />} />
-          <Route path="goals" element={<Goals />} />
+          <Route path="goals" element={<Navigate to="/progress#goals" replace />} />
           <Route path="supplements" element={<Supplements />} />
           <Route path="steps" element={<Steps />} />
           <Route path="photos" element={<Photos />} />
           <Route path="calls" element={<Calls />} />
-          <Route path="files" element={<Files />} />
+          <Route path="files" element={<Navigate to="/calls" replace />} />
           <Route path="me" element={<Me />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

@@ -43,7 +43,9 @@ export interface DailyCheckin {
   date: string // YYYY-MM-DD in client's timezone
   weight: number | null
   rested: boolean | null
-  train_desire: number | null
+  training_day: boolean | null
+  train_desire: number | null // only asked on training days
+  hunger: number | null // 1-5, how hungry yesterday
   digestion: string
   untracked_food: string
   steps: number | null

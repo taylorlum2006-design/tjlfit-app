@@ -79,17 +79,18 @@ function CheckIns() {
         {!recent.length ? <Empty>No daily check-ins yet.</Empty> : (
           <div className="overflow-x-auto -mx-5 px-5">
             <table className="w-full text-sm min-w-[560px]">
-              <thead><tr className="text-left text-xs text-mute">{['Date', 'Weight', 'Rested', 'Train', 'Steps', 'Goals', 'Notes'].map(h => <th key={h} className="font-medium pb-2 pr-3">{h}</th>)}</tr></thead>
+              <thead><tr className="text-left text-xs text-mute">{['Date', 'Weight', 'Rested', 'Training', 'Hunger', 'Steps', 'Goals', 'Notes'].map(h => <th key={h} className="font-medium pb-2 pr-3">{h}</th>)}</tr></thead>
               <tbody className="divide-y divide-line">
                 {recent.map(r => (
                   <tr key={r.date}>
                     <td className="py-2.5 pr-3 whitespace-nowrap">{shortDate(r.date)}</td>
                     <td className="pr-3">{fmtW(r.weight, u) ?? '–'}</td>
                     <td className="pr-3">{r.rested == null ? '–' : r.rested ? 'Yes' : <span className="text-danger">No</span>}</td>
-                    <td className="pr-3">{r.train_desire ?? '–'}</td>
+                    <td className="pr-3 whitespace-nowrap">{r.training_day == null ? '–' : r.training_day ? `Yes${r.train_desire ? ` · ${r.train_desire}/5` : ''}` : 'Rest'}</td>
+                    <td className="pr-3">{r.hunger ? `${r.hunger}/5` : '–'}</td>
                     <td className="pr-3">{r.steps?.toLocaleString() ?? '–'}</td>
                     <td className="pr-3">{r.goals_done.length}/{plan?.goals.length ?? 0}</td>
-                    <td className="text-mute">{[r.digestion && `Digestion: ${r.digestion}`, r.untracked_food && `Untracked: ${r.untracked_food}`].filter(Boolean).join(' · ') || ''}</td>
+                    <td className="text-mute">{[r.untracked_food && `Off plan: ${r.untracked_food}`, r.digestion && `Digestion: ${r.digestion}`].filter(Boolean).join(' · ') || ''}</td>
                   </tr>
                 ))}
               </tbody>

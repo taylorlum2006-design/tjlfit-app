@@ -209,3 +209,6 @@ create policy "read shared or coached files" on storage.objects for select to au
     public.is_coach_of(((storage.foldername(name))[1])::uuid)
     or exists (select 1 from public.documents d where d.storage_path = name and d.client_id = auth.uid() and d.client_visible)
   ));
+-- TJL Fit: daily check-in v2. Adds "training day?" and "hunger". Safe to run on a live database.
+alter table public.daily_checkins add column if not exists training_day boolean;
+alter table public.daily_checkins add column if not exists hunger int check (hunger between 1 and 5);

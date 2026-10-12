@@ -1,4 +1,7 @@
+import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useClient } from '../state'
+import GoalsSection from './Goals'
 import { Card, CardTitle, Empty, PageTitle } from '../components/ui'
 import { StepsChart, WeightChart } from '../components/WeeklyCharts'
 import { shortDate } from '../lib/dates'
@@ -7,11 +10,14 @@ import { fmtW } from '../lib/units'
 export default function Progress() {
   const { daily, weekly, plan, profile } = useClient()
   const recent = [...weekly].reverse().slice(0, 6)
+  const { hash } = useLocation()
+  useEffect(() => { if (hash === '#goals') setTimeout(() => document.getElementById('goals')?.scrollIntoView({ behavior: 'smooth' }), 50) }, [hash])
   return (
     <div className="space-y-4">
       <PageTitle sub="Weekly averages. One day means nothing, the trend is what counts.">Progress</PageTitle>
       <WeightChart rows={daily} units={profile.units} />
       <StepsChart rows={daily} goal={plan?.step_goal ?? 10000} />
+      <GoalsSection />
       <Card>
         <CardTitle>Weekly check-ins</CardTitle>
         {!recent.length ? <Empty>Your weekly check-ins show here.</Empty> : (
