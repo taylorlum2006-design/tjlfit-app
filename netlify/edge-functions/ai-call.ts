@@ -122,7 +122,7 @@ async function isCoach(token: string) {
 
 export default async (req: Request) => {
   if (req.method !== 'POST') return json(405, { error: 'Use POST' })
-  const key = Netlify.env.get('ANTHROPIC_API_KEY')
+  const key = (Netlify.env.get('ANTHROPIC_API_KEY') || '').trim().replace(/^["']|["']$/g, '')
   if (!key) return json(500, { error: 'Add ANTHROPIC_API_KEY in Netlify to turn on AI for calls' })
   const token = (req.headers.get('authorization') || '').replace('Bearer ', '')
   if (!(await isCoach(token))) return json(403, { error: 'Sign in as the coach again' })
@@ -150,7 +150,10 @@ export default async (req: Request) => {
   })
   if (!res.ok || !res.body) {
     const err = await res.json().catch(() => ({}))
-    return json(502, { error: err?.error?.message || 'The AI service failed, try again' })
+    const msg = String(err?.error?.message || '')
+    if (res.status === 401 || /api.?key/i.test(msg)) return json(502, { error: `Anthropic rejected the ANTHROPIC_API_KEY saved in Netlify. Make a new key at console.anthropic.com (it starts with sk-ant-), paste it into Netlify, then redeploy.` })
+    if (/credit|billing/i.test(msg)) return json(502, { error: 'Your Anthropic account is out of credit. Add some at console.anthropic.com > Billing.' })
+    return json(502, { error: msg || 'The AI service failed, try again' })
   }
   // Pass the stream straight through; the browser assembles the text.
   return new Response(res.body, { headers: { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' } })
