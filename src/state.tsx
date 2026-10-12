@@ -3,15 +3,17 @@ import { api } from './data'
 import { emptyDaily } from './data/api'
 import type { DailyCheckin, Plan, Profile, WeeklyCheckin } from './types'
 import { todayIn } from './lib/dates'
+import { linkToken } from './lib/link'
 
 // Signed-in user -------------------------------------------------------------
-interface SessionState { me: Profile | null; loading: boolean; refresh: () => Promise<void> }
-const SessionCtx = createContext<SessionState>({ me: null, loading: true, refresh: async () => {} })
+interface SessionState { me: Profile | null; loading: boolean; linkError: string; refresh: () => Promise<void> }
+const SessionCtx = createContext<SessionState>({ me: null, loading: true, linkError: '', refresh: async () => {} })
 export const useSession = () => useContext(SessionCtx)
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [me, setMe] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [linkError, setLinkError] = useState('')
   const refresh = useCallback(async () => {
     const id = await api.currentUserId()
     let p = id ? await api.getProfile(id) : null
@@ -24,10 +26,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [])
   useEffect(() => {
     const minSplash = new Promise(r => setTimeout(r, 1300))
-    Promise.all([refresh(), minSplash]).then(() => setLoading(false))
+    const start = async () => {
+      if (linkToken && api.mode === 'live') { try { await api.loginWithLink(linkToken) } catch (e: any) { setLinkError(e.message) } }
+      await refresh()
+    }
+    Promise.all([start(), minSplash]).then(() => setLoading(false))
     return api.onAuthChange(() => { refresh() })
   }, [refresh])
-  return <SessionCtx.Provider value={{ me, loading, refresh }}>{children}</SessionCtx.Provider>
+  return <SessionCtx.Provider value={{ me, loading, linkError, refresh }}>{children}</SessionCtx.Provider>
 }
 
 // One client's data (used by the client app and by the coach viewing a client)

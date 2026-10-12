@@ -9,6 +9,7 @@ import { daysBetween, mondayOf, shortDate, todayIn } from '../../lib/dates'
 import { last7, weeklyAverages } from '../../lib/stats'
 import { fmtW } from '../../lib/units'
 import { IconChevron } from '../../components/icons'
+import LinkShare from '../../components/LinkShare'
 
 interface Row { p: Profile; daily: DailyCheckin[]; weeklyDone: boolean }
 
@@ -16,6 +17,7 @@ export default function CoachHome() {
   const { me } = useSession()
   const [rows, setRows] = useState<Row[] | null>(null)
   const [email, setEmail] = useState(''); const [name, setName] = useState(''); const [busy, setBusy] = useState(false)
+  const [created, setCreated] = useState<{ name: string; link: string } | null>(null)
   const toast = useToast()
 
   async function load() {
@@ -30,7 +32,7 @@ export default function CoachHome() {
 
   async function invite(e: React.FormEvent) {
     e.preventDefault(); setBusy(true)
-    try { await api.inviteClient(email.trim(), name.trim()); setEmail(''); setName(''); toast('Invite sent'); load() }
+    try { const link = await api.inviteClient(email.trim(), name.trim()); setCreated({ name: name.trim(), link }); setEmail(''); setName(''); load() }
     catch (err: any) { toast(err.message) } finally { setBusy(false) }
   }
 
@@ -45,7 +47,7 @@ export default function CoachHome() {
 
       {!rows ? <Spinner /> : (
         <div className="space-y-3">
-          {!rows.length && <Card><Empty>No clients yet. Invite your first one below.</Empty></Card>}
+          {!rows.length && <Card><Empty>No clients yet. Add your first one below.</Empty></Card>}
           {rows.map(({ p, daily, weeklyDone }) => {
             const today = todayIn(p.timezone)
             const last = [...daily].filter(d => d.submitted).sort((a, b) => b.date.localeCompare(a.date))[0]
@@ -75,12 +77,14 @@ export default function CoachHome() {
       )}
 
       <Card className="mt-8">
-        <CardTitle>Invite a client</CardTitle>
-        <form onSubmit={invite} className="space-y-4">
-          <Field label="Name"><input className="input" value={name} onChange={e => setName(e.target.value)} placeholder="First and last name" /></Field>
-          <Field label="Email" hint="They get an email with a login link. No password needed."><input className="input" type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="client@email.com" /></Field>
-          <button className="btn" disabled={busy}>{busy ? 'Sending…' : 'Send invite'}</button>
-        </form>
+        <CardTitle>Add a client</CardTitle>
+        {created ? <LinkShare name={created.name} link={created.link} onDone={() => setCreated(null)} /> : (
+          <form onSubmit={invite} className="space-y-4">
+            <Field label="Name"><input className="input" required value={name} onChange={e => setName(e.target.value)} placeholder="First and last name" /></Field>
+            <Field label="Email (optional)" hint="Only used to tell clients apart. Nothing is emailed to them."><input className="input" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="client@email.com" /></Field>
+            <button className="btn" disabled={busy}>{busy ? 'Adding…' : 'Add client and get their link'}</button>
+          </form>
+        )}
       </Card>
       <p className="text-xs text-mute mt-4">Clients who miss 2 or more days of check-ins are flagged in red.</p>
     </div>

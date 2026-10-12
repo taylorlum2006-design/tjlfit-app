@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ClientProvider, SessionProvider, useSession } from './state'
 import { ToastProvider } from './components/ui'
 import Splash from './components/Splash'
+import { basename } from './lib/link'
 import Greeting from './components/Greeting'
 import ClientLayout from './components/ClientLayout'
 import Login from './screens/Login'
@@ -55,7 +56,7 @@ function Routed() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <ToastProvider>
         <SessionProvider><Routed /></SessionProvider>
       </ToastProvider>

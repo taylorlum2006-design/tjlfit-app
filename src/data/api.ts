@@ -4,8 +4,8 @@ export interface Api {
   mode: 'demo' | 'live'
   currentUserId(): Promise<string | null>
   onAuthChange(cb: () => void): () => void
-  signIn(email: string): Promise<void>
-  verifyCode(email: string, code: string): Promise<void>
+  /** Signs in with a personal link token. Throws a readable message if the link is dead. */
+  loginWithLink(token: string): Promise<void>
   signOut(): Promise<void>
   getProfile(id: string): Promise<Profile | null>
   updateProfile(id: string, patch: Partial<Profile>): Promise<void>
@@ -18,7 +18,10 @@ export interface Api {
   saveWeekly(row: WeeklyCheckin): Promise<void>
   listPhotos(clientId: string): Promise<Photo[]>
   uploadPhoto(clientId: string, date: string, angle: Photo['angle'], blob: Blob): Promise<void>
-  inviteClient(email: string, name: string): Promise<void>
+  /** Creates the client and returns their personal link. */
+  inviteClient(email: string, name: string): Promise<string>
+  /** New personal link for a client. Their old one stops working. */
+  newClientLink(clientId: string): Promise<string>
   removeClient(clientId: string): Promise<void>
   listCalls(clientId: string): Promise<Call[]>
   saveCall(call: Call): Promise<void>

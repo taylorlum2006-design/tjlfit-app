@@ -13,6 +13,7 @@ import { last7, latestWeight } from '../../lib/stats'
 import { fmtW } from '../../lib/units'
 import type { Profile } from '../../types'
 import { IconBack } from '../../components/icons'
+import LinkShare from '../../components/LinkShare'
 
 const TABS = ['Overview', 'Check-ins', 'Plan', 'Calls', 'Files', 'Photos'] as const
 
@@ -34,7 +35,7 @@ function Detail() {
         <Link to="/coach" className="inline-flex items-center gap-1 text-sm text-mute"><IconBack />Clients</Link>
       </header>
       <h1 className="h-display text-[48px]">{profile.name || profile.email}</h1>
-      <p className="text-mute mt-1">{profile.email} · started {shortDate(profile.start_date)} · {profile.timezone}</p>
+      <p className="text-mute mt-1">{profile.email.endsWith('@clients.tjlfit.app') ? 'No email' : profile.email} · started {shortDate(profile.start_date)} · {profile.timezone}</p>
       <div className="flex gap-1 mt-6 mb-5 p-1 rounded-xl bg-surface border border-line overflow-x-auto" role="tablist">
         {TABS.map(t => <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={`flex-1 shrink-0 whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-medium ${tab === t ? 'bg-bone text-black' : 'text-mute'}`}>{t}</button>)}
       </div>
@@ -44,6 +45,7 @@ function Detail() {
       {tab === 'Calls' && <CoachCalls />}
       {tab === 'Files' && <CoachFiles />}
       {tab === 'Photos' && <Photos />}
+      {tab === 'Overview' && <ClientLink />}
       {tab === 'Overview' && <RemoveClient />}
     </div>
   )
@@ -131,5 +133,28 @@ function RemoveClient() {
     <div className="mt-10 pt-6 border-t border-line">
       <button className="text-sm text-danger" disabled={busy} onClick={remove}>{busy ? 'Removing…' : 'Remove client and delete all their data'}</button>
     </div>
+  )
+}
+
+function ClientLink() {
+  const { profile } = useClient()
+  const toast = useToast()
+  const [link, setLink] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  async function make() {
+    if (!confirm(`Make a new link for ${profile.name || 'this client'}? Their current link will stop working, so you'll need to send them the new one.`)) return
+    setBusy(true)
+    try { setLink(await api.newClientLink(profile.id)) } catch (e: any) { toast(e.message) } finally { setBusy(false) }
+  }
+  return (
+    <Card className="mt-4">
+      <CardTitle>Login link</CardTitle>
+      {link ? <LinkShare name={profile.name || 'Client'} link={link} onDone={() => setLink(null)} /> : (
+        <>
+          <p className="text-sm text-mute">For security, links are only shown once. If they lost it, or you think someone else has it, make a new one. The old one stops working.</p>
+          <button className="btn-ghost w-full mt-4" disabled={busy} onClick={make}>{busy ? 'Making…' : 'Make a new link'}</button>
+        </>
+      )}
+    </Card>
   )
 }

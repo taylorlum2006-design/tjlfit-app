@@ -1,7 +1,5 @@
 // Coach-only: permanently deletes one of the coach's clients, their files and all their data.
-import { createClient } from '@supabase/supabase-js'
-
-const json = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
+import { adminClient, json } from '../lib/server.mjs'
 
 async function emptyFolder(admin, bucket, folder) {
   for (;;) {
@@ -14,9 +12,8 @@ async function emptyFolder(admin, bucket, folder) {
 
 export default async (req) => {
   if (req.method !== 'POST') return json(405, { error: 'Use POST' })
-  const url = process.env.VITE_SUPABASE_URL, service = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !service) return json(500, { error: 'Server is missing Supabase settings' })
-  const admin = createClient(url, service, { auth: { persistSession: false } })
+  let admin
+  try { admin = adminClient() } catch (e) { return json(500, { error: e.message }) }
 
   const token = (req.headers.get('authorization') || '').replace('Bearer ', '')
   const { data: who } = await admin.auth.getUser(token)

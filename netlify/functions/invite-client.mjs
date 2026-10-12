@@ -1,29 +1,22 @@
-// Coach-only: invites a client by email and creates their starting plan.
-// Needs SUPABASE_SERVICE_ROLE_KEY and VITE_SUPABASE_URL in Netlify environment variables.
-import { createClient } from '@supabase/supabase-js'
-
-const json = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
+// Coach-only: creates a client account and returns their personal login link. Sends no email.
+import { adminClient, json, newLink, requireCoach } from '../lib/server.mjs'
+import { randomUUID } from 'node:crypto'
 
 export default async (req) => {
   if (req.method !== 'POST') return json(405, { error: 'Use POST' })
-  const url = process.env.VITE_SUPABASE_URL
-  const service = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !service) return json(500, { error: 'Server is missing Supabase settings' })
-  const admin = createClient(url, service, { auth: { persistSession: false } })
-
-  const token = (req.headers.get('authorization') || '').replace('Bearer ', '')
-  const { data: who } = await admin.auth.getUser(token)
-  if (!who?.user) return json(401, { error: 'Sign in again' })
-  const { data: me } = await admin.from('profiles').select('role').eq('id', who.user.id).single()
-  if (me?.role !== 'coach') return json(403, { error: 'Only coaches can invite clients' })
-
-  const { email, name, redirectTo } = await req.json()
-  if (!email) return json(400, { error: 'Email is required' })
-  const { data, error } = await admin.auth.admin.inviteUserByEmail(email.trim().toLowerCase(), {
-    data: { name: name || '', coach_id: who.user.id },
-    redirectTo,
-  })
-  if (error) return json(400, { error: error.message })
-  await admin.from('plans').upsert({ client_id: data.user.id })
-  return json(200, { ok: true })
+  try {
+    const admin = adminClient()
+    const coachId = await requireCoach(admin, req)
+    const { email, name, origin } = await req.json()
+    if (!name?.trim()) return json(400, { error: 'Add their name' })
+    // Email is optional. Without one, the client gets a private placeholder address they never see.
+    const address = (email || '').trim().toLowerCase() || `client-${randomUUID()}@clients.tjlfit.app`
+    const { data, error } = await admin.auth.admin.createUser({
+      email: address, email_confirm: true, user_metadata: { name: name.trim(), coach_id: coachId },
+    })
+    if (error) return json(400, { error: error.message.includes('already') ? 'There is already an account with that email' : error.message })
+    await admin.from('plans').upsert({ client_id: data.user.id })
+    const link = await newLink(admin, data.user.id, origin)
+    return json(200, { link, clientId: data.user.id })
+  } catch (e) { return e instanceof Response ? e : json(500, { error: String(e.message || e) }) }
 }

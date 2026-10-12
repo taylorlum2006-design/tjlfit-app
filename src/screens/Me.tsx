@@ -42,7 +42,6 @@ export default function Me() {
           <li><span className="text-bone font-medium">Android:</span> in Chrome, tap the menu, then Install app.</li>
         </ul>
       </Card>
-      {api.mode === 'live' && <button className="btn-ghost w-full" onClick={() => api.signOut()}>Sign out</button>}
       {api.mode === 'demo' && <button className="text-sm text-mute w-full py-2" onClick={resetDemo}>Reset preview data</button>}
     </div>
   )

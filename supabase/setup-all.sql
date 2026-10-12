@@ -1,4 +1,4 @@
--- TJL Fit: full database setup (0001 + 0002 + 0003 in one). Paste into Supabase > SQL Editor > New query > Run. Run once on a new project.
+-- TJL Fit: full database setup (0001 to 0004 in one). Paste into Supabase > SQL Editor > New query > Run. Run once on a new project.
 
 -- TJL Fit: initial schema. Paste into Supabase > SQL Editor > New query > Run.
 -- Safe to run once on a fresh project.
@@ -212,3 +212,12 @@ create policy "read shared or coached files" on storage.objects for select to au
 -- TJL Fit: daily check-in v2. Adds "scheduled to train today?" and "energy levels today". Safe to run on a live database, and safe to run twice.
 alter table public.daily_checkins add column if not exists training_day boolean;
 alter table public.daily_checkins add column if not exists energy int check (energy between 1 and 5);
+-- TJL Fit: personal login links. Each person gets a private link that signs them in.
+-- Only a fingerprint (hash) of each link is stored, never the link itself. Safe to run twice.
+create table if not exists public.access_links (
+  user_id uuid primary key references auth.users on delete cascade,
+  token_hash text not null unique,
+  created_at timestamptz not null default now()
+);
+alter table public.access_links enable row level security;
+-- No policies on purpose: only the app's server functions can read or write this table.

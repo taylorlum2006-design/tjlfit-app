@@ -10,13 +10,20 @@ export function supabaseApi(url: string, key: string): Api {
     mode: 'live',
     async currentUserId() { const { data } = await sb.auth.getSession(); return data.session?.user.id ?? null },
     onAuthChange(cb) { const { data } = sb.auth.onAuthStateChange(() => cb()); return () => data.subscription.unsubscribe() },
-    async signIn(email) {
-      const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin, shouldCreateUser: false } })
-      if (error) throw new Error(error.message.includes('Signups not allowed') ? 'No account for that email yet. Ask your coach to invite you.' : error.message)
-    },
-    async verifyCode(email, code) {
-      const { error } = await sb.auth.verifyOtp({ email, token: code.trim(), type: 'email' })
-      if (error) throw new Error(error.message.toLowerCase().includes('expired') ? 'That code has expired. Send a new one.' : 'That code did not work. Check it and try again.')
+    async loginWithLink(token) {
+      const KEY = 'tjl-link'
+      const { data } = await sb.auth.getSession()
+      let last: string | null = null
+      try { last = localStorage.getItem(KEY) } catch {}
+      if (data.session && last === token) return
+      const res = await fetch('/.netlify/functions/link-login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token }) })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(body.error || 'This link is not working. Ask your coach for a new one.')
+      if (data.session?.user.id !== body.userId) {
+        const { error } = await sb.auth.verifyOtp({ token_hash: body.tokenHash, type: 'magiclink' })
+        if (error) throw new Error('Could not sign you in. Open your link again.')
+      }
+      try { localStorage.setItem(KEY, token) } catch {}
     },
     async signOut() { await sb.auth.signOut() },
     async getProfile(id) { return must(await sb.from('profiles').select('*').eq('id', id).maybeSingle()) },
@@ -45,9 +52,22 @@ export function supabaseApi(url: string, key: string): Api {
       const res = await fetch('/.netlify/functions/invite-client', {
         method: 'POST',
         headers: { 'content-type': 'application/json', authorization: `Bearer ${data.session?.access_token}` },
-        body: JSON.stringify({ email, name, redirectTo: window.location.origin }),
+        body: JSON.stringify({ email, name, origin: window.location.origin }),
       })
-      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Invite failed')
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(body.error || 'Could not add client')
+      return body.link
+    },
+    async newClientLink(clientId) {
+      const { data } = await sb.auth.getSession()
+      const res = await fetch('/.netlify/functions/client-link', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${data.session?.access_token}` },
+        body: JSON.stringify({ clientId, origin: window.location.origin }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(body.error || 'Could not make a new link')
+      return body.link
     },
     async removeClient(clientId) {
       const { data } = await sb.auth.getSession()

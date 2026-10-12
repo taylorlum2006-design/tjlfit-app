@@ -2,6 +2,7 @@ import type { Api } from './api'
 import type { Call, CallPrivate, DailyCheckin, Doc, Photo, Plan, Profile, WeeklyCheckin } from '../types'
 import { samplePlan } from './sample'
 import { addDays, mondayOf, todayIn } from '../lib/dates'
+import { appPath } from '../lib/link'
 
 // Demo mode: runs entirely in this browser so the app can be previewed before Supabase is connected.
 const KEY = 'tjl-demo-v1'
@@ -55,10 +56,9 @@ export function resetDemo() { db = seed(); save(); location.reload() }
 export const demoApi: Api = {
   mode: 'demo',
   // Preview: the coach view lives at /coach, everything else is the sample client's app.
-  async currentUserId() { return location.pathname.startsWith('/coach') ? 'coach' : 'alex' },
+  async currentUserId() { return appPath().startsWith('/coach') ? 'coach' : 'alex' },
   onAuthChange(cb) { listeners.add(cb); return () => listeners.delete(cb) },
-  async signIn() {},
-  async verifyCode() {},
+  async loginWithLink() {},
   async signOut() { listeners.forEach(l => l()) },
   async getProfile(id) { return db.profiles.find(p => p.id === id) ?? null },
   async updateProfile(id, patch) { db.profiles = db.profiles.map(p => (p.id === id ? { ...p, ...patch } : p)); save() },
@@ -79,7 +79,9 @@ export const demoApi: Api = {
     const id = crypto.randomUUID()
     db.profiles.push({ id, role: 'client', coach_id: 'coach', name, email, timezone: tz, units: 'lbs', start_date: todayIn(tz), daily_reminder_time: '08:00', weekly_checkin_day: 0 })
     db.plans.push(samplePlan(id)); save()
+    return `${location.origin}/c/preview-link-for-${id.slice(0, 8)}`
   },
+  async newClientLink(id) { return `${location.origin}/c/preview-link-for-${id.slice(0, 8)}-new` },
   async removeClient(id) {
     db.profiles = db.profiles.filter(p => p.id !== id); db.plans = db.plans.filter(p => p.client_id !== id)
     db.daily = db.daily.filter(r => r.client_id !== id); db.weekly = db.weekly.filter(r => r.client_id !== id)
