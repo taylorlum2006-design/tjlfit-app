@@ -19,7 +19,7 @@ function seed(): Store {
       if ((d * 7 + id.length) % 6 === 0) continue // some missed days
       const date = addDays(today, -d)
       const t = start - d
-      rows.push({ client_id: id, date, weight: +(w0 + trend * t + Math.sin(t * 1.7) * 0.9).toFixed(1), rested: t % 4 !== 0, training_day: t % 7 < 5, train_desire: t % 7 < 5 ? 3 + (t % 3) : null, hunger: 2 + (t % 3), digestion: '', untracked_food: '', steps: Math.round(stepBase + Math.sin(t) * 2200 + (t % 5) * 300), water: 3 + (t % 2), goals_done: [], supplements_taken: [], submitted: true })
+      rows.push({ client_id: id, date, weight: +(w0 + trend * t + Math.sin(t * 1.7) * 0.9).toFixed(1), rested: t % 4 !== 0, training_day: t % 7 < 5, train_desire: t % 7 < 5 ? 3 + (t % 3) : null, energy: 2 + (t % 4), digestion: '', untracked_food: '', steps: Math.round(stepBase + Math.sin(t) * 2200 + (t % 5) * 300), water: 3 + (t % 2), goals_done: [], supplements_taken: [], submitted: true })
     }
     const weeks: WeeklyCheckin[] = []
     for (let w = mondayOf(addDays(today, -start + 7)); w < mondayOf(today); w = addDays(w, 7)) {

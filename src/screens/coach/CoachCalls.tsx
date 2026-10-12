@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../../data'
-import { emptyPlan, emptySummary } from '../../data/api'
+import { emptySummary } from '../../data/api'
 import { useClient } from '../../state'
 import { Badge, Card, Empty, Field, Spinner, useToast } from '../../components/ui'
 import { callTime, isUpcoming, toLocalInput } from '../../lib/calls'
@@ -43,7 +43,7 @@ export default function CoachCalls() {
 }
 
 function CallItem({ call, open, onToggle, onChange }: { call: Call; open: boolean; onToggle: () => void; onChange: () => void }) {
-  const { profile, plan, reload } = useClient()
+  const { profile } = useClient()
   const toast = useToast()
   const [c, setC] = useState(call)
   const [priv, setPriv] = useState<CallPrivate | null>(null)
@@ -82,15 +82,6 @@ function CallItem({ call, open, onToggle, onChange }: { call: Call; open: boolea
     setBusy('ai')
     try { const s = await api.summarize(priv.transcript, profile.name); setDraft(s); setVersion(v => v + 1); setDirty(true); toast('Summary ready. Review it, then save.') }
     catch (e: any) { toast(e.message) } finally { setBusy('') }
-  }
-
-  async function pushGoals() {
-    const p = plan ?? emptyPlan(profile.id)
-    const existing = new Set(p.goals.map(g => g.text.toLowerCase()))
-    const add = draft.action_items.filter(t => !existing.has(t.toLowerCase())).map(text => ({ id: Math.random().toString(36).slice(2, 9), text }))
-    if (!add.length) return toast('Those are already in their goals')
-    await api.savePlan({ ...p, goals: [...p.goals, ...add] }); await reload()
-    toast(`Added ${add.length} to their daily goals`)
   }
 
   async function remove() {
@@ -138,7 +129,6 @@ function CallItem({ call, open, onToggle, onChange }: { call: Call; open: boolea
               {LISTS.map(([k, label]) => (
                 <ListField key={`${k}-${version}`} label={label} value={draft[k] as string[]} onChange={v => upD({ [k]: v } as any)} />
               ))}
-              {draft.action_items.length > 0 && <button className="text-sm text-gold" onClick={pushGoals}>Add action items to their daily goals</button>}
             </div>
 
             <Field label="Private notes (coach only)"><textarea className="input min-h-[80px]" value={priv.notes} onChange={e => upP({ notes: e.target.value })} placeholder="Only you see this" /></Field>

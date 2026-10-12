@@ -57,3 +57,26 @@ export function StepsChart({ rows, goal }: { rows: DailyCheckin[]; goal: number 
     </Card>
   )
 }
+
+export function EnergyChart({ rows }: { rows: DailyCheckin[] }) {
+  const data = weeklyAverages(rows, 'energy').map(d => ({ ...d, value: +d.value.toFixed(1) }))
+  const last = data[data.length - 1]?.value
+  return (
+    <Card>
+      <CardTitle right={last != null && <span className="text-sm text-mute">this week {last}/5</span>}>Weekly average energy</CardTitle>
+      {data.length < 1 ? <Empty>Rate your energy in each daily check-in and your weekly average shows here.</Empty> : (
+        <div className="h-48 -ml-3">
+          <ResponsiveContainer>
+            <LineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
+              <CartesianGrid stroke={brand.colors.line} vertical={false} />
+              <XAxis dataKey="label" {...axis} minTickGap={16} />
+              <YAxis {...axis} width={44} domain={[1, 5]} ticks={[1, 2, 3, 4, 5]} />
+              <Tooltip {...tip} formatter={(v: any, _n: any, p: any) => [`${v}/5 (${p.payload.days} days)`, 'Average']} labelFormatter={l => `Week of ${l}`} />
+              <Line type="monotone" dataKey="value" stroke={brand.colors.gold} strokeWidth={2.5} dot={{ r: 3, fill: brand.colors.gold, strokeWidth: 0 }} activeDot={{ r: 5 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </Card>
+  )
+}

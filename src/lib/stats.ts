@@ -4,7 +4,7 @@ import { addDays, mondayOf, shortDate } from './dates'
 const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null)
 
 /** Weekly averages (Monday start), averaging only days that were actually logged. */
-export function weeklyAverages(rows: DailyCheckin[], key: 'weight' | 'steps', weeks = 12) {
+export function weeklyAverages(rows: DailyCheckin[], key: 'weight' | 'steps' | 'energy', weeks = 12) {
   const byWeek = new Map<string, number[]>()
   for (const r of rows) {
     const v = r[key]
@@ -17,7 +17,7 @@ export function weeklyAverages(rows: DailyCheckin[], key: 'weight' | 'steps', we
 }
 
 /** Average over the last 7 calendar days ending on `today`, logged days only. */
-export function last7(rows: DailyCheckin[], key: 'weight' | 'steps', today: string) {
+export function last7(rows: DailyCheckin[], key: 'weight' | 'steps' | 'energy', today: string) {
   const from = addDays(today, -6)
   const vals = rows.filter(r => r.date >= from && r.date <= today && r[key] != null).map(r => r[key] as number)
   return { value: avg(vals), days: vals.length }

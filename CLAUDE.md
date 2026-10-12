@@ -47,10 +47,10 @@ Reference: the TJL Fit website. Pure black background, huge heavy condensed uppe
 ## Client app tabs
 
 1. **Home:** today's daily check-in card, current macros with the coach's note, latest weight and change since start, today's goals (x/y), supplements (x/y), water vs goal, steps vs goal, banners for a missed daily check-in or a due weekly check-in.
-2. **Daily check-in:** required: morning weight, woke up rested yes/no, training day yes/rest; desire to train 1-5 (required, only shown on training days). Optional: hunger yesterday 1-5, food eaten off plan (text). Digestion question removed (column kept for old data). Editable for today. One row per client per date.
-3. **Goals:** daily checklist set by the coach, shown on the Progress page under the charts (`/goals` redirects to `/progress#goals`). Call action items can be added here.
+2. **Daily check-in:** required: morning weight, woke up rested yes/no, energy levels today 1-5, scheduled to train today yes/rest day; desire to train 1-5 (required, only shown on training days). Optional: food eaten off plan (text). Digestion question removed (column kept for old data).
+3. **Goals:** removed from the client app and the coach plan editor (owner decision). `goals` column kept, unused.
 4. **Workout:** TBD, waiting on screenshots.
-5. **Progress:** weekly average weight graph and weekly average steps graph (week starts Monday, averages only over days actually logged), plus weekly check-in history.
+5. **Progress:** weekly average weight, steps and energy charts only (week starts Monday, averages only over days actually logged). No goals, no weekly check-in history.
 6. **Nutrition:** daily targets, phase name, meal cards (name, timing note, per-meal macros, ingredients with grams and kcal), day total. Totals must be computed from the ingredients, never typed separately. Support alternate day types (e.g. a different meal set on specific weekdays) and multiple options for a meal.
 7. **Supplements:** grouped by timing (with breakfast, post-workout, before bed, etc.), dose, coach note, tick-off per day.
 8. **Steps:** today vs goal with progress bar, log input, 7-day average, goal hit x/7.
@@ -59,7 +59,7 @@ Reference: the TJL Fit website. Pure black background, huge heavy condensed uppe
 11. **Calls:** upcoming call (time, meeting link, coach booking link), past calls with recording link and the client-visible summary and action items. Visibility of summaries is a coach setting per call.
 12. **Me:** name, units (lbs/kg), time zone, notification settings, install-app instructions.
 
-Menu items: Home, Check-in, Nutrition, Progress & goals, Supplements, Steps, Photos, Calls & files (`/files` redirects to `/calls`), Me.
+Menu items: Home, Check-in, Nutrition, Progress, Supplements, Steps, Photos, Calls & files (`/files` redirects to `/calls`), Me.
 
 Navigation: a menu button in the top right of the header (shows the current page name) that drops down a list of every section. No bottom bar. No clipped or crammed labels.
 
@@ -128,5 +128,5 @@ At the end of each phase: run it, test it at phone width, fix issues, commit, de
 - **Done (Phase 4):** Calls (`calls` client-visible table + coach-only `call_private` for transcript, notes, draft summary; summary copied to `calls.summary` only when shared), AI summaries via `netlify/functions/summarize-call.mjs` (model from `ANTHROPIC_MODEL`, default `claude-sonnet-5-5`), action items to Goals, client Calls page with next call and booking link (`VITE_BOOKING_LINK`). Files: per-client PDFs in private `documents` bucket, shared or coach only (`supabase/migrations/0002_calls_files.sql`). Navigation is a top-right dropdown.
 - **Access:** clients never see coach UI. Sign-in is a 6-digit email code (`verifyOtp`, works in the iOS home-screen app) shown only once per device; sessions persist. Coach dashboard lives at `/coach`. Preview mode has no sign-in: `/` is the sample client, `/coach` is the coach. Daily greeting screen (`src/components/Greeting.tsx`) shows on first open each day.
 - **Launch prep:** `remove-client` Netlify function (coach-only, empties photos/documents folders, deletes auth user, rows cascade) with a Remove button on the coach Overview tab; time zone auto-set from the device on first live sign-in; sign-in code accepts 6 to 10 digits; `supabase/setup-all.sql` = 0001 + 0002 in one paste; SETUP.md is now a go-live checklist (custom SMTP required for client emails).
-- **Migrations:** `0003_checkin_questions.sql` adds `training_day` and `hunger` (also appended to `setup-all.sql`). Run new migrations on the live database before or right after deploying.
+- **Migrations:** `0003_checkin_questions.sql` adds `training_day` and `energy` (also appended to `setup-all.sql`). Run new migrations on the live database before or right after deploying.
 - **Next:** Workout tab (waiting on screenshots), Phase 3 reminders, Phase 5 backups, optional Fathom webhook import.

@@ -111,19 +111,6 @@ export default function PlanEditor() {
         </div>
       </Card>
 
-      <h3 className="h-display text-3xl pt-4">Daily goals</h3>
-      <Card>
-        <div className="space-y-2">
-          {p.goals.map((g, i) => (
-            <div key={g.id} className="flex gap-2">
-              <input className="input" value={g.text} onChange={e => up({ goals: p.goals.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)) })} />
-              <button className="btn-ghost px-3 text-danger" aria-label="Remove goal" onClick={() => up({ goals: p.goals.filter((_, j) => j !== i) })}>✕</button>
-            </div>
-          ))}
-          <button className="text-sm text-gold pt-2" onClick={() => up({ goals: [...p.goals, { id: uid(), text: '' }] })}>+ Add goal</button>
-        </div>
-      </Card>
-
       <div className="sticky bottom-4 pt-2">
         <button className="btn shadow-[0_8px_30px_rgba(0,0,0,.7)]" disabled={!dirty || busy} onClick={save}>{busy ? 'Saving…' : dirty ? 'Save plan' : 'All changes saved'}</button>
       </div>

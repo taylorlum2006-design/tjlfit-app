@@ -13,7 +13,7 @@ export default function ClientLayout() {
     { to: '/', label: 'Home', end: true },
     { to: '/checkin', label: 'Check-in' },
     { to: '/nutrition', label: 'Nutrition' },
-    { to: '/progress', label: 'Progress & goals' },
+    { to: '/progress', label: 'Progress' },
     { to: '/supplements', label: 'Supplements' },
     { to: '/steps', label: 'Steps' },
     ...(plan?.photos_enabled === false ? [] : [{ to: '/photos', label: 'Photos' }]),

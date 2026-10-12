@@ -39,7 +39,7 @@ function Routed() {
           <Route path="checkin" element={<CheckIn />} />
           <Route path="nutrition" element={<Nutrition />} />
           <Route path="progress" element={<Progress />} />
-          <Route path="goals" element={<Navigate to="/progress#goals" replace />} />
+          <Route path="goals" element={<Navigate to="/progress" replace />} />
           <Route path="supplements" element={<Supplements />} />
           <Route path="steps" element={<Steps />} />
           <Route path="photos" element={<Photos />} />

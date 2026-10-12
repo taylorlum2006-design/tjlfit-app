@@ -45,7 +45,7 @@ export interface DailyCheckin {
   rested: boolean | null
   training_day: boolean | null
   train_desire: number | null // only asked on training days
-  hunger: number | null // 1-5, how hungry yesterday
+  energy: number | null // 1-5, energy levels today
   digestion: string
   untracked_food: string
   steps: number | null

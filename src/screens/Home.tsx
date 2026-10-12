@@ -28,7 +28,6 @@ export default function Home() {
   const w = latestWeight(daily)
   const u = profile.units
   const change = w.first != null && w.last != null ? w.last - w.first : null
-  const goalsTotal = plan?.goals.length ?? 0
   const suppTotal = plan?.supplements.length ?? 0
   const water = todayRow.water ?? 0
   const waterGoal = plan?.water_goal ?? 3
@@ -79,18 +78,11 @@ export default function Home() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <Link to="/progress#goals" className="card block">
-          <p className="label">Goals</p>
-          <p className="num text-4xl mt-3">{todayRow.goals_done.length}<span className="text-mute">/{goalsTotal}</span></p>
-          <p className="text-xs text-mute mt-2">done today</p>
-        </Link>
-        <Link to="/supplements" className="card block">
-          <p className="label">Supplements</p>
-          <p className="num text-4xl mt-3">{todayRow.supplements_taken.length}<span className="text-mute">/{suppTotal}</span></p>
-          <p className="text-xs text-mute mt-2">taken today</p>
-        </Link>
-      </div>
+      <Link to="/supplements" className="card block">
+        <p className="label">Supplements</p>
+        <p className="num text-4xl mt-3">{todayRow.supplements_taken.length}<span className="text-mute">/{suppTotal}</span></p>
+        <p className="text-xs text-mute mt-2">taken today</p>
+      </Link>
 
       <Card>
         <CardTitle right={<span className="text-sm text-mute">goal {waterGoal} L</span>}>Water</CardTitle>
