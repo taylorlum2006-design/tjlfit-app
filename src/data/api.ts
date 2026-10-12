@@ -30,6 +30,8 @@ export interface Api {
   getCallPrivate(callId: string): Promise<CallPrivate | null>
   saveCallPrivate(row: CallPrivate): Promise<void>
   summarize(transcript: string, clientName: string, onProgress?: (chars: number) => void): Promise<CallSummary>
+  /** Builds or edits a plan from the coach's instructions (not saved yet). */
+  buildPlan(instructions: string, transcript: string, clientName: string, plan: Plan): Promise<ProcessResult>
   /** Reads a call and returns a recap plus an updated plan (not saved yet). */
   processCall(transcript: string, clientName: string, plan: Plan, onProgress?: (chars: number) => void): Promise<ProcessResult>
   listDocs(clientId: string): Promise<Doc[]>

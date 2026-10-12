@@ -85,3 +85,10 @@ export function applyPlan(current: Plan, u: ProcessResult['plan']): Plan {
     supplements: u.supplements ?? current.supplements,
   }
 }
+
+/** Strips timestamps and cue numbers from .vtt / .srt exports so only the words are sent. */
+export function cleanTranscript(raw: string) {
+  return raw.replace(/^WEBVTT.*$/m, '').split('\n')
+    .filter(l => !/^\d+$/.test(l.trim()) && !/-->/.test(l))
+    .join('\n').replace(/\n{3,}/g, '\n\n').trim()
+}

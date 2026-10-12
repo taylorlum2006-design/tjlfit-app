@@ -5,7 +5,6 @@ import { useClient } from '../../state'
 import { Badge, Card, Empty, Field, Spinner, useToast } from '../../components/ui'
 import { callTime, isUpcoming, toLocalInput } from '../../lib/calls'
 import type { Call, CallPrivate, CallSummary } from '../../types'
-import ImportCall from './ImportCall'
 
 const LISTS: [keyof CallSummary, string][] = [['decisions', 'Decisions'], ['wins', 'Wins'], ['concerns', 'Concerns'], ['action_items', 'Action items']]
 const lines = (s: string) => s.split('\n').map(x => x.replace(/^[-•*]\s*/, '').trim()).filter(Boolean)
@@ -35,8 +34,8 @@ export default function CoachCalls() {
   if (!calls) return <Spinner />
   return (
     <div className="space-y-3">
-      <ImportCall onDone={load} />
-      <button className="btn-ghost w-full" onClick={addCall}>Schedule an upcoming call</button>
+      <button className="btn" onClick={addCall}>Add a call</button>
+      <p className="text-xs text-mute">Add upcoming calls with the meeting link, or past calls with the recording link and a recap.</p>
       {!calls.length && <Card><Empty>No calls yet.</Empty></Card>}
       {calls.map(c => <CallItem key={c.id} call={c} open={openId === c.id} onToggle={() => setOpenId(openId === c.id ? null : c.id)} onChange={load} />)}
     </div>

@@ -94,7 +94,12 @@ export const demoApi: Api = {
   async getCallPrivate(callId) { return db.callPrivate.find(c => c.call_id === callId) ?? null },
   async saveCallPrivate(row) { db.callPrivate = [...db.callPrivate.filter(c => c.call_id !== row.call_id), row]; save() },
   async summarize() { throw new Error('AI is only available in the live app.') },
-  // Preview only: a pretend result so the screens can be tried without the AI.
+  // Preview only: pretend results so the screens can be tried without the AI.
+  async buildPlan(_i, _t, _n, plan) {
+    await new Promise(r => setTimeout(r, 1200))
+    const meals = plan.meals.map(m => (m.name.includes('Dinner') ? { ...m, items: m.items.map(it => (it.name.startsWith('Potato') ? { ...it, name: 'Jasmine rice, dry weight', grams: 60, kcal: 216, p: 4, c: 47.4, f: 0.4 } : it)) } : m))
+    return { title: '', summary: { summary: '', decisions: [], wins: [], concerns: [], action_items: [] }, plan: { phase: null, coach_note: null, step_goal: null, water_goal: null, meals, supplements: null }, changes: ['Dinner: potato 270 g swapped for jasmine rice 60 g dry', 'Day total: 2,872 kcal, P 196 g, C 368 g, F 67 g'] }
+  },
   async processCall(_t, _n, plan, onProgress) {
     for (let i = 1; i <= 5; i++) { await new Promise(r => setTimeout(r, 250)); onProgress?.(i * 400) }
     const meals = plan.meals.map(m => (m.name.includes('Dinner') ? { ...m, items: m.items.map(it => (it.name.startsWith('Potato') ? { ...it, grams: 200, kcal: 154, p: 4, c: 34.8, f: 0.2 } : it)) } : m))

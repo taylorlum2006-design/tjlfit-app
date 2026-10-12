@@ -7,6 +7,7 @@ import { EnergyChart, StepsChart, WeightChart } from '../../components/WeeklyCha
 import PlanEditor from './PlanEditor'
 import Photos from '../Photos'
 import CoachCalls from './CoachCalls'
+import PlanAI from './PlanAI'
 import CoachFiles from './CoachFiles'
 import { shortDate } from '../../lib/dates'
 import { last7, latestWeight } from '../../lib/stats'
@@ -41,7 +42,7 @@ function Detail() {
       </div>
       {tab === 'Overview' && <Overview />}
       {tab === 'Check-ins' && <CheckIns />}
-      {tab === 'Plan' && <PlanEditor />}
+      {tab === 'Plan' && <><PlanAI /><PlanEditorFresh /></>}
       {tab === 'Calls' && <CoachCalls />}
       {tab === 'Files' && <CoachFiles />}
       {tab === 'Photos' && <Photos />}
@@ -157,4 +158,10 @@ function ClientLink() {
       )}
     </Card>
   )
+}
+
+/** Remounts the editor whenever the saved plan changes (e.g. after the AI updates it). */
+function PlanEditorFresh() {
+  const { plan } = useClient()
+  return <PlanEditor key={plan?.updated_at ?? 'new'} />
 }

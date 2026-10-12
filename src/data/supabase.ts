@@ -89,6 +89,12 @@ export function supabaseApi(url: string, key: string): Api {
       const res = await fetch('/api/ai-call', { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${data.session?.access_token}` }, body: JSON.stringify({ mode: 'summary', transcript, clientName }) })
       return cleanSummary((parseJson<any>(await readStream(res, onProgress))).summary)
     },
+    async buildPlan(instructions, transcript, clientName, plan) {
+      const { data } = await sb.auth.getSession()
+      const { meals, supplements, phase, coach_note, step_goal, water_goal } = plan
+      const res = await fetch('/api/ai-call', { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${data.session?.access_token}` }, body: JSON.stringify({ mode: 'plan', instructions, transcript, clientName, plan: { phase, coach_note, step_goal, water_goal, meals, supplements } }) })
+      return cleanResult(parseJson<any>(await readStream(res)))
+    },
     async processCall(transcript, clientName, plan, onProgress) {
       const { data } = await sb.auth.getSession()
       const { meals, supplements, phase, coach_note, step_goal, water_goal } = plan

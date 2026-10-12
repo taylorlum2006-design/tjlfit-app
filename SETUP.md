@@ -23,7 +23,7 @@ Never paste passwords or keys into a chat. They only go into Supabase and Netlif
 | `SUPABASE_SERVICE_ROLE_KEY` | Secret (service_role) key. Keep this private. |
 | `VITE_COACH_NAME` | Taylor |
 | `VITE_BOOKING_LINK` | Your booking link, e.g. Calendly (optional) |
-| `ANTHROPIC_API_KEY` | From console.anthropic.com → API keys. Powers "Process call". Tick **Contains secret values**. |
+| `ANTHROPIC_API_KEY` | From console.anthropic.com → API keys. Powers "Build with AI". Tick **Contains secret values**. |
 
 3. **Deploys → Trigger deploy → Deploy project.** After a minute the sample data is gone.
 
@@ -52,7 +52,8 @@ Lost link, or worried someone else has it? Open the client → Overview → **Ma
 ## Day to day
 
 - **What clients see:** only the client app, through their personal link. If they type `/coach` they're sent back to their plan, and the database blocks them from anyone else's data.
-- **Calls:** inside a client, Calls tab → **New call from Fathom** → upload or paste the transcript → **Process call**. In about a minute it updates their plan (meals, macros, supplements, step and water targets, coach note), writes the recap and shares it, and shows you what changed with an **Undo** button. Transcripts and private notes are never visible to the client. Use **Schedule an upcoming call** for future calls with a meeting link.
+- **Plans:** inside a client, Plan tab → **Build with AI**. Type what you want ("Cut, 2,400 kcal, 190 g protein, 4 meals, likes chicken and rice") and optionally attach their onboarding call transcript. It builds the meals with grams and macros, supplements, step and water targets and coach note, and saves. Use it for edits too ("swap dinner rice for potatoes"). Undo is right there. You can still edit anything by hand below it.
+- **Calls:** inside a client, Calls tab → **Add a call** for upcoming calls (meeting link) or past ones (recording link and recap). Transcripts and private notes are never visible to the client.
 - **Files:** inside a client, upload PDFs up to 50 MB, shared or coach only.
 - **Removing a client:** Overview tab → Remove client. Permanent.
 - **Changes to the app:** every push to `main` on GitHub redeploys automatically in about a minute. Client data lives in Supabase and is never touched by a redeploy.
