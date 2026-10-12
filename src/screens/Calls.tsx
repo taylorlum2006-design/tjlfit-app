@@ -13,8 +13,8 @@ export default function Calls() {
   const [calls, setCalls] = useState<Call[] | null>(null)
   useEffect(() => { api.listCalls(profile.id).then(c => setCalls(c.filter(x => x.client_visible))) }, [profile.id])
   if (!calls) return <Spinner />
-  const upcoming = calls.filter(c => isUpcoming(c.scheduled_at)).sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at))
-  const past = calls.filter(c => !isUpcoming(c.scheduled_at))
+  const upcoming = calls.filter(c => isUpcoming(c)).sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at))
+  const past = calls.filter(c => !isUpcoming(c))
   const next = upcoming[0]
 
   return (

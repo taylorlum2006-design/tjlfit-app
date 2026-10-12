@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { Api } from './api'
 import type { Doc, Photo } from '../types'
+import { cleanResult, cleanSummary, parseJson, readStream } from '../lib/ai'
 
 export function supabaseApi(url: string, key: string): Api {
   const sb: SupabaseClient = createClient(url, key)
@@ -83,16 +84,16 @@ export function supabaseApi(url: string, key: string): Api {
     async deleteCall(id) { must(await sb.from('calls').delete().eq('id', id)) },
     async getCallPrivate(callId) { return must(await sb.from('call_private').select('*').eq('call_id', callId).maybeSingle()) },
     async saveCallPrivate(row) { must(await sb.from('call_private').upsert(row)) },
-    async summarize(transcript, clientName) {
+    async summarize(transcript, clientName, onProgress) {
       const { data } = await sb.auth.getSession()
-      const res = await fetch('/.netlify/functions/summarize-call', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', authorization: `Bearer ${data.session?.access_token}` },
-        body: JSON.stringify({ transcript, clientName }),
-      })
-      const body = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(body.error || 'Summary failed')
-      return body.summary
+      const res = await fetch('/api/ai-call', { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${data.session?.access_token}` }, body: JSON.stringify({ mode: 'summary', transcript, clientName }) })
+      return cleanSummary((parseJson<any>(await readStream(res, onProgress))).summary)
+    },
+    async processCall(transcript, clientName, plan, onProgress) {
+      const { data } = await sb.auth.getSession()
+      const { meals, supplements, phase, coach_note, step_goal, water_goal } = plan
+      const res = await fetch('/api/ai-call', { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${data.session?.access_token}` }, body: JSON.stringify({ mode: 'process', transcript, clientName, plan: { phase, coach_note, step_goal, water_goal, meals, supplements } }) })
+      return cleanResult(parseJson<any>(await readStream(res, onProgress)))
     },
     async listDocs(clientId) {
       const rows: any[] = must(await sb.from('documents').select('*').eq('client_id', clientId).order('created_at', { ascending: false })) ?? []

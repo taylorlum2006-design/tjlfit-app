@@ -93,7 +93,18 @@ export const demoApi: Api = {
   async deleteCall(id) { db.calls = db.calls.filter(c => c.id !== id); db.callPrivate = db.callPrivate.filter(c => c.call_id !== id); save() },
   async getCallPrivate(callId) { return db.callPrivate.find(c => c.call_id === callId) ?? null },
   async saveCallPrivate(row) { db.callPrivate = [...db.callPrivate.filter(c => c.call_id !== row.call_id), row]; save() },
-  async summarize() { throw new Error('AI summaries switch on once the app is connected to Supabase and your Anthropic key is added (see SETUP.md). You can still type a summary in by hand.') },
+  async summarize() { throw new Error('AI is only available in the live app.') },
+  // Preview only: a pretend result so the screens can be tried without the AI.
+  async processCall(_t, _n, plan, onProgress) {
+    for (let i = 1; i <= 5; i++) { await new Promise(r => setTimeout(r, 250)); onProgress?.(i * 400) }
+    const meals = plan.meals.map(m => (m.name.includes('Dinner') ? { ...m, items: m.items.map(it => (it.name.startsWith('Potato') ? { ...it, grams: 200, kcal: 154, p: 4, c: 34.8, f: 0.2 } : it)) } : m))
+    return {
+      title: 'Week 6 check-in',
+      summary: { summary: 'Down 2.4 lbs over 7 weeks, right on pace. Energy is good on training days, a bit flat on rest days.', decisions: ['Dinner potato down to 200 g', 'Steps up to 11,000 a day'], wins: ['Every session hit for 3 weeks'], concerns: ['Weekend steps still low'], action_items: ['Walk 20 minutes after lunch on weekends', 'Weigh dinner potatoes raw'] },
+      plan: { phase: null, coach_note: null, step_goal: 11000, water_goal: null, meals, supplements: null },
+      changes: ['Dinner: potato 270 g -> 200 g raw', 'Step goal: 10,000 -> 11,000'],
+    }
+  },
   async listDocs(clientId) { return db.docs.filter(d => d.client_id === clientId).sort((a, b) => b.created_at.localeCompare(a.created_at)) },
   async uploadDoc(clientId, title, file, visible) {
     if (file.size > 3_000_000) throw new Error('Preview mode only holds files under 3 MB. Real uploads allow much larger files.')

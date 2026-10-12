@@ -1,3 +1,4 @@
+import type { ProcessResult } from '../lib/ai'
 import type { Call, CallPrivate, CallSummary, DailyCheckin, Doc, Photo, Plan, Profile, WeeklyCheckin } from '../types'
 
 export interface Api {
@@ -28,7 +29,9 @@ export interface Api {
   deleteCall(id: string): Promise<void>
   getCallPrivate(callId: string): Promise<CallPrivate | null>
   saveCallPrivate(row: CallPrivate): Promise<void>
-  summarize(transcript: string, clientName: string): Promise<CallSummary>
+  summarize(transcript: string, clientName: string, onProgress?: (chars: number) => void): Promise<CallSummary>
+  /** Reads a call and returns a recap plus an updated plan (not saved yet). */
+  processCall(transcript: string, clientName: string, plan: Plan, onProgress?: (chars: number) => void): Promise<ProcessResult>
   listDocs(clientId: string): Promise<Doc[]>
   uploadDoc(clientId: string, title: string, file: File, visible: boolean): Promise<void>
   updateDoc(id: string, patch: Partial<Pick<Doc, 'title' | 'client_visible'>>): Promise<void>
